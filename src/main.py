@@ -21,18 +21,48 @@ backright = Motor(Ports.PORT4,GearSetting.RATIO_6_1,False)
 player=Controller()
 
 #--------end conf--------
+def setup(value=0):
+  if value == 1:
+    pass #driver values
+  else:
+    pass #inital values de motores y whatnot
+#--------driver Funcs---------
+def joystickfunc():
+  frontleft.spin(FORWARD)
+  backleft.spin(FORWARD)
+  frontright.spin(FORWARD)
+  backright.spin(FORWARD)
+  while True:
+    frontleft.set_velocity(player.axis3.position()+player.axis1.position(),PERCENT)
+    backleft.set_velocity(player.axis3.position()+player.axis1.position(),PERCENT)
+    frontright.set_velocity(player.axis3.position()-player.axis1.position(),PERCENT)
+    backright.set_velocity(player.axis3.position()-player.axis1.position(),PERCENT)
+    wait(5,MSEC)
 
-frontleft.spin(FORWARD)
-backleft.spin(FORWARD)
-frontright.spin(FORWARD)
-backright.spin(FORWARD)
+#--------auton funcs----------
+def autonTime():
+  pass #autonomo
 
-while True:
-  frontleft.set_velocity(player.axis3.position()+player.axis1.position(),PERCENT)
-  backleft.set_velocity(player.axis3.position()+player.axis1.position(),PERCENT)
-  frontright.set_velocity(player.axis3.position()-player.axis1.position(),PERCENT)
-  backright.set_velocity(player.axis3.position()-player.axis1.position(),PERCENT)
-  wait(5,MSEC)
+#------comp funcs---------
+def startDrivers():
+  setup(1)
+  driverTime.broadcast()
 
+def autoF():
+  active = Thread(autonTime)
+  while (comp.is_autonomous() and comp.is_enabled()):
+    wait(10,MSEC)
+  active.stop()
 
-        
+def drivF():
+  active = Thread(startDrivers)
+  while (comp.is_driver_control() and comp.is_enabled()):
+    wait(10,MSEC)
+  active.stop()
+
+driverTime = Event()
+comp = Competition(drivF,autoF)
+driverTime(joystickfunc)
+wait(15,MSEC)
+
+setup()
