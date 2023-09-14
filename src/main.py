@@ -17,6 +17,7 @@ frontleft = Motor(Ports.PORT1, GearSetting.RATIO_6_1, True)
 frontright = Motor(Ports.PORT2, GearSetting.RATIO_6_1, False)
 backleft = Motor(Ports.PORT3,GearSetting.RATIO_6_1,True)
 backright = Motor(Ports.PORT4,GearSetting.RATIO_6_1,False)
+intake = Motor(Ports.PORT5,GearSetting.RATIO_18_1,False)
 
 player=Controller()
 
@@ -38,6 +39,15 @@ def joystickfunc():
     frontright.set_velocity(player.axis3.position()-player.axis1.position(),PERCENT)
     backright.set_velocity(player.axis3.position()-player.axis1.position(),PERCENT)
     wait(5,MSEC)
+def intakefunc():
+  intake.set_velocity(100,PERCENT)
+  while True:
+    if player.buttonL2.pressing():
+      intake.spin(FORWARD)
+    elif player.buttonL1.pressing():
+      intake.spin(REVERSE)
+    else:
+      intake.stop()
 # endregion
 # region --------auton funcs----------
 def autonTime():
@@ -61,6 +71,7 @@ def drivF():
 driverTime = Event()
 comp = Competition(drivF,autoF)
 driverTime(joystickfunc)
+driverTime(intakefunc)
 wait(15,MSEC)
 
 setup()
