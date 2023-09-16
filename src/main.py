@@ -17,7 +17,7 @@ frontleft = Motor(Ports.PORT1, GearSetting.RATIO_6_1, True)
 frontright = Motor(Ports.PORT2, GearSetting.RATIO_6_1, False)
 backleft = Motor(Ports.PORT3,GearSetting.RATIO_6_1,True)
 backright = Motor(Ports.PORT4,GearSetting.RATIO_6_1,False)
-intake = Motor(Ports.PORT5,GearSetting.RATIO_18_1,False)
+intake = Motor(Ports.PORT5,GearSetting.RATIO_18_1,True)
 
 player=Controller()
 
