@@ -17,6 +17,8 @@ frontleft = Motor(Ports.PORT1, GearSetting.RATIO_6_1, True)
 frontright = Motor(Ports.PORT2, GearSetting.RATIO_6_1, False)
 backleft = Motor(Ports.PORT3,GearSetting.RATIO_6_1,True)
 backright = Motor(Ports.PORT4,GearSetting.RATIO_6_1,False)
+rightside = MotorGroup(frontright,backright)
+leftside = MotorGroup(frontleft,backleft)
 intake = Motor(Ports.PORT5,GearSetting.RATIO_18_1,True)
 catapult1 = Motor(Ports.PORT6,GearSetting.RATIO_36_1,False)
 catapult2 = Motor(Ports.PORT7,GearSetting.RATIO_36_1,True)
@@ -32,21 +34,18 @@ def windup():
   catapult.stop()
 def setup(value=0):
   if value == 1:
-    pass #driver values
-  else:
-    pass #inital values de motores y whatnot
+    rightside.set_velocity(50,PERCENT)
+    leftside.set_velocity(50,PERCENT)
+  else: 
+    intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
 # endregion
 # region --------driver Funcs---------
 def joystickfunc():
-  frontleft.spin(FORWARD)
-  backleft.spin(FORWARD)
-  frontright.spin(FORWARD)
-  backright.spin(FORWARD)
+  leftside.spin(FORWARD)
+  rightside.spin(FORWARD)
   while True:
-    frontleft.set_velocity(player.axis3.position()+player.axis1.position(),PERCENT)
-    backleft.set_velocity(player.axis3.position()+player.axis1.position(),PERCENT)
-    frontright.set_velocity(player.axis3.position()-player.axis1.position(),PERCENT)
-    backright.set_velocity(player.axis3.position()-player.axis1.position(),PERCENT)
+    leftside.set_velocity(player.axis3.position()+player.axis1.position(),PERCENT)
+    rightside.set_velocity(player.axis3.position()-player.axis1.position(),PERCENT)
     wait(5,MSEC)
 def intakefunc():
   intake.set_velocity(100,PERCENT)
@@ -67,8 +66,29 @@ def laCATAPULTA():
       windup()
 # endregion
 # region --------auton funcs----------
+def move(dis=float(24)):
+  factor=5.5
+  leftside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
+  rightside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
+def turn(theta=90):
+  rightside.set_velocity(40,PERCENT)
+  leftside.set_velocity(40,PERCENT)
+  factor=48
+  leftside.spin_for(FORWARD,theta/factor,TURNS,wait=False)
+  rightside.spin_for(REVERSE,theta/factor,TURNS,wait=True)
+  rightside.set_velocity(50,PERCENT)
+  leftside.set_velocity(50,PERCENT)
 def autonTime():
-  pass #autonomo
+  setup(1)
+  intake.spin_for(FORWARD,1,TURNS,wait=False)
+  move(48.5)
+  wait(10,MSEC)
+  turn(90)
+  wait(10,MSEC)
+  intake.spin_for(REVERSE,1,TURNS,wait=False)
+  move(9)
+  wait(10,MSEC)
+  move(-30)
 # endregion 
 # region ------comp funcs---------
 def startDrivers():
