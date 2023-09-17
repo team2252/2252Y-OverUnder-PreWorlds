@@ -18,9 +18,18 @@ frontright = Motor(Ports.PORT2, GearSetting.RATIO_6_1, False)
 backleft = Motor(Ports.PORT3,GearSetting.RATIO_6_1,True)
 backright = Motor(Ports.PORT4,GearSetting.RATIO_6_1,False)
 intake = Motor(Ports.PORT5,GearSetting.RATIO_18_1,True)
+catapult1 = Motor(Ports.PORT6,GearSetting.RATIO_36_1,False)
+catapult2 = Motor(Ports.PORT7,GearSetting.RATIO_36_1,True)
+catapult = MotorGroup(catapult1, catapult2)
 
 player=Controller()
 
+def windup():
+  catapult.set_stopping(HOLD)
+  catapult.spin(FORWARD)
+  while catapult.efficiency() > 50:
+    wait(10,MSEC)
+  catapult.stop()
 def setup(value=0):
   if value == 1:
     pass #driver values
@@ -48,6 +57,14 @@ def intakefunc():
       intake.spin(REVERSE)
     else:
       intake.stop()
+def laCATAPULTA():
+  catapult.set_velocity(100,PERCENT)
+  catapult.set_stopping(HOLD)
+  while True:
+    if player.buttonR1.pressing():
+      catapult.set_stopping(COAST)
+      wait(0.5,SECONDS)
+      windup()
 # endregion
 # region --------auton funcs----------
 def autonTime():
