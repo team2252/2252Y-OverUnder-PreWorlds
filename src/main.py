@@ -81,14 +81,14 @@ def turn(theta=90):
 def autonTime():
   setup(1)
   intake.spin_for(FORWARD,1,TURNS,wait=False)
-  move(47)
+  move(49)
   wait(10,MSEC)
   turn(90)
   wait(10,MSEC)
   intake.spin_for(REVERSE,1,TURNS,wait=False)
   move(9)
   wait(10,MSEC)
-  move(-18)
+  move(-19)
   wait(10,MSEC)
   turn(-90)
   wait(10,MSEC)
@@ -111,7 +111,7 @@ def autonTime():
   wait(5,MSEC)
   turn(97)
   wait(5,MSEC)
-  move(27.5)
+  move(27.4)
   wait(5,MSEC)
 # endregion 
 # region ------comp funcs---------
