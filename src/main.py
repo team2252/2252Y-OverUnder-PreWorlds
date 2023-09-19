@@ -24,7 +24,8 @@ catapult1 = Motor(Ports.PORT6,GearSetting.RATIO_36_1,False)
 catapult2 = Motor(Ports.PORT7,GearSetting.RATIO_36_1,True)
 catapult = MotorGroup(catapult1, catapult2)
 wings = DigitalOut(brain.three_wire_port.a)
-triballsens = Limit(brain.three_wire_port.b)
+wings2 = DigitalOut(brain.three_wire_port.b)
+triballsens = Limit(brain.three_wire_port.c)
 
 player=Controller()
 
@@ -41,6 +42,7 @@ def setup(value=0):
   else: 
     intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
   wings.set(False)
+  wings2.set(False)
 # endregion
 # region --------driver Funcs---------
 def joystickfunc():
@@ -71,9 +73,11 @@ def wingManager():
   while True:
     if player.buttonR1.pressing():
       wings.set(True)
+      wings2.set(True)
       while player.buttonR1.pressing():
         wait(10,MSEC)
       wings.set(False)
+      wings2.set(False)
     wait(10,MSEC)
 # endregion
 # region --------auton funcs----------
