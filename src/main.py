@@ -23,6 +23,8 @@ intake = Motor(Ports.PORT5,GearSetting.RATIO_18_1,True)
 catapult1 = Motor(Ports.PORT6,GearSetting.RATIO_36_1,False)
 catapult2 = Motor(Ports.PORT7,GearSetting.RATIO_36_1,True)
 catapult = MotorGroup(catapult1, catapult2)
+wings = DigitalOut(brain.three_wire_port.a)
+triballsens = Limit(brain.three_wire_port.b)
 
 player=Controller()
 
@@ -38,6 +40,7 @@ def setup(value=0):
     leftside.set_velocity(50,PERCENT)
   else: 
     intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
+  wings.set(False)
 # endregion
 # region --------driver Funcs---------
 def joystickfunc():
@@ -50,7 +53,7 @@ def joystickfunc():
 def intakefunc():
   intake.set_velocity(100,PERCENT)
   while True:
-    if player.buttonL2.pressing():
+    if player.buttonL2.pressing() and not triballsens.pressing():
       intake.spin(FORWARD)
     elif player.buttonL1.pressing():
       intake.spin(REVERSE)
@@ -64,6 +67,14 @@ def laCATAPULTA():
       catapult.set_stopping(COAST)
       wait(0.5,SECONDS)
       windup()
+def wingManager():
+  while True:
+    if player.buttonR1.pressing():
+      wings.set(True)
+      while player.buttonR1.pressing():
+        wait(10,MSEC)
+      wings.set(False)
+    wait(10,MSEC)
 # endregion
 # region --------auton funcs----------
 def move(dis=float(24)):
@@ -133,6 +144,7 @@ driverTime = Event()
 comp = Competition(drivF,autoF)
 driverTime(joystickfunc)
 driverTime(intakefunc)
+driverTime(wingManager)
 wait(15,MSEC)
 
 setup()
