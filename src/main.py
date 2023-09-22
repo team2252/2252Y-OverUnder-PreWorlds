@@ -20,8 +20,8 @@ backright = Motor(Ports.PORT4,GearSetting.RATIO_6_1,False)
 rightside = MotorGroup(frontright,backright)
 leftside = MotorGroup(frontleft,backleft)
 intake = Motor(Ports.PORT5,GearSetting.RATIO_18_1,True)
-catapult1 = Motor(Ports.PORT6,GearSetting.RATIO_36_1,False)
-catapult2 = Motor(Ports.PORT7,GearSetting.RATIO_36_1,True)
+catapult1 = Motor(Ports.PORT6,GearSetting.RATIO_18_1,False)
+catapult2 = Motor(Ports.PORT7,GearSetting.RATIO_18_1,True)
 catapult = MotorGroup(catapult1, catapult2)
 wings = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
@@ -65,10 +65,14 @@ def laCATAPULTA():
   catapult.set_velocity(100,PERCENT)
   catapult.set_stopping(HOLD)
   while True:
-    if player.buttonR1.pressing():
-      catapult.set_stopping(COAST)
-      wait(0.5,SECONDS)
-      windup()
+    while player.buttonUp.pressing():
+      catapult.spin(FORWARD)
+      wait(5,MSEC)
+    while player.buttonDown.pressing():
+      catapult.spin(REVERSE)
+      wait(5,MSEC)
+    catapult.stop()
+    wait(5,MSEC)
 def wingManager():
   while True:
     if player.buttonR1.pressing():
@@ -136,6 +140,7 @@ comp = Competition(drivF,autoF)
 driverTime(joystickfunc)
 driverTime(intakefunc)
 driverTime(wingManager)
+driverTime(laCATAPULTA)
 wait(15,MSEC)
 
 setup()
