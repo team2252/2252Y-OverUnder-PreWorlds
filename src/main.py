@@ -9,6 +9,7 @@
 # region --------conf--------
 # Library imports
 from vex import *
+from autons import offen # selección de autonomo. defen/offen
 
 # Brain should be defined by default
 brain=Brain()
@@ -100,25 +101,8 @@ def turn(theta=90):
   leftside.set_velocity(50,PERCENT)
   wait(5,MSEC)
 def autonTime():
-  setup(1)
-  intake.spin_for(FORWARD,1,TURNS,wait=False)
-  move(49)
-  turn(90)
-  intake.spin_for(REVERSE,1,TURNS,wait=False)
-  move(9)
-  move(-19)
-  turn(-90)
-  intake.spin_for(FORWARD,2,TURNS,wait=False)
-  move(5)
-  move(-7)
-  turn(90)
-  intake.spin_for(REVERSE,3,TURNS,wait=False)
-  move(20)
-  move(-6)
-  turn(80)
-  move(47)
-  turn(97)
-  move(27.4)
+  try: offen()
+  except: defen()
 # endregion 
 # region ------comp funcs---------
 def startDrivers():
