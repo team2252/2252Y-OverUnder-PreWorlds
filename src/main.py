@@ -9,7 +9,7 @@
 # region --------conf--------
 # Library imports
 from vex import *
-from autons import offen # selección de autonomo. defen/offen
+auton = 'offen' # selección de autonomo. defen/offen
 
 # Brain should be defined by default
 brain=Brain()
@@ -64,7 +64,7 @@ def intakefunc():
       intake.stop()
 def laCATAPULTA():
   catapult.set_velocity(100,PERCENT)
-  catapult.set_stopping(HOLD)
+  catapult.set_stopping(COAST)
   while True:
     while player.buttonUp.pressing():
       catapult.spin(FORWARD)
@@ -92,8 +92,8 @@ def move(dis=float(24)):
   rightside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
   wait(5,MSEC)
 def turn(theta=90):
-  rightside.set_velocity(40,PERCENT)
-  leftside.set_velocity(40,PERCENT)
+  rightside.set_velocity(30,PERCENT)
+  leftside.set_velocity(30,PERCENT)
   factor=48
   leftside.spin_for(FORWARD,theta/factor,TURNS,wait=False)
   rightside.spin_for(REVERSE,theta/factor,TURNS,wait=True)
@@ -101,8 +101,28 @@ def turn(theta=90):
   leftside.set_velocity(50,PERCENT)
   wait(5,MSEC)
 def autonTime():
-  try: offen()
-  except: defen()
+  setup(1)
+  if auton == 'offen':
+    intake.spin_for(FORWARD,1,TURNS,wait=False)
+    move(49)
+    turn(90)
+    intake.spin_for(REVERSE,1.5,TURNS,wait=False)
+    move(9.5)
+    move(-18)
+    turn(-90)
+    intake.spin_for(FORWARD,1.5,TURNS,wait=False)
+    move(5)
+    move(-3)
+    turn(85)
+    intake.spin_for(REVERSE,2,TURNS,wait=False)
+    move(21)
+    move(-6)
+    turn(86)
+    move(50)
+    turn(90)
+    move(30)
+  elif auton == 'defen':
+    pass
 # endregion 
 # region ------comp funcs---------
 def startDrivers():
