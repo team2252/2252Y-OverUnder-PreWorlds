@@ -24,12 +24,15 @@ intake = Motor(Ports.PORT5,GearSetting.RATIO_18_1,True)
 catapult1 = Motor(Ports.PORT6,GearSetting.RATIO_18_1,False)
 catapult2 = Motor(Ports.PORT7,GearSetting.RATIO_18_1,True)
 catapult = MotorGroup(catapult1, catapult2)
-wings = DigitalOut(brain.three_wire_port.a)
+wings1 = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
 triballsens = Limit(brain.three_wire_port.c)
 
 player=Controller()
 
+def wings(exp=True):
+  wings1.set(exp)
+  wings2.set(exp)
 def windup():
   catapult.set_stopping(HOLD)
   catapult.spin(FORWARD)
@@ -42,8 +45,7 @@ def setup(value=0):
     leftside.set_velocity(50,PERCENT)
   else: 
     intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
-  wings.set(False)
-  wings2.set(False)
+  wings(False)
 # endregion
 # region --------driver Funcs---------
 def joystickfunc():
@@ -77,12 +79,10 @@ def laCATAPULTA():
 def wingManager():
   while True:
     if player.buttonR1.pressing():
-      wings.set(True)
-      wings2.set(True)
+      wings(True)
       while player.buttonR1.pressing():
         wait(10,MSEC)
-      wings.set(False)
-      wings2.set(False)
+      wings(False)
     wait(10,MSEC)
 # endregion
 # region --------auton funcs----------
@@ -104,25 +104,33 @@ def autonTime():
   setup(1)
   if auton == 'offen':
     intake.spin_for(FORWARD,1,TURNS,wait=False)
-    move(49)
+    move(44)
     turn(90)
     intake.spin_for(REVERSE,1.5,TURNS,wait=False)
     move(9.5)
-    move(-18)
-    turn(-90)
-    intake.spin_for(FORWARD,1.5,TURNS,wait=False)
-    move(5)
-    move(-3)
-    turn(85)
-    intake.spin_for(REVERSE,2,TURNS,wait=False)
-    move(21)
-    move(-6)
-    turn(86)
-    move(50)
-    turn(90)
-    move(30)
+    move(-22)
+    # turn(-90)
+    # intake.spin_for(FORWARD,1.75,TURNS,wait=False)
+    # move(5)
+    # move(-3)
+    # turn(85)
+    # intake.spin_for(REVERSE,2,TURNS,wait=False)
+    # move(21)
+    # move(-6)
+    # turn(86)
+    # move(50)
+    # turn(90)
+    # move(30)
   elif auton == 'defen':
-    pass
+    intake.spin_for(FORWARD,1,TURNS,wait=False)
+    move(49)
+    turn(-90)
+    move(10)
+    intake.spin_for(REVERSE,1.5,TURNS,wait=False)
+    move(-20)
+    turn(-45)
+    move(34+(34*1.5))
+    
 # endregion 
 # region ------comp funcs---------
 def startDrivers():
