@@ -103,11 +103,13 @@ def turn(theta=90):
 def autonTime():
   setup(1)
   if auton == 'offen':
-    intake.spin_for(FORWARD,1,TURNS,wait=False)
+    intake.spin_for(FORWARD,0.5,TURNS,wait=False)
     move(48)
     turn(90)
     intake.spin_for(REVERSE,1.5,TURNS,wait=False)
+    wait(100,MSEC)
     move(9.4)
+    intake.stop() 
     move(-29)
     wings1.set(True)
     wait(200,MSEC)
@@ -118,11 +120,11 @@ def autonTime():
     rightside.set_velocity(50,PERCENT)
     leftside.set_velocity(50,PERCENT)
     wings1.set(False)
-    move(-5)
+    move(-4)
     turn(90)
     move(46)
     turn(90)
-    move(26)
+    move(27)
     
 
 
