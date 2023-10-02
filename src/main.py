@@ -120,11 +120,18 @@ def autonTime():
     rightside.set_velocity(50,PERCENT)
     leftside.set_velocity(50,PERCENT)
     wings1.set(False)
-    move(-4)
+    move(-4.5)
     turn(90)
     move(46)
     turn(90)
-    move(27)
+    move(26)
+    intake.spin_for(FORWARD,4,TURNS,wait=False)
+    
+    wait(1000,MSEC)
+    turn(-10)
+    move(-1)
+    catapult.spin_for(FORWARD,0.5,TURNS,wait=False)
+    
     
 
 
