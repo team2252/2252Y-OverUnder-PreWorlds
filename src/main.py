@@ -22,11 +22,8 @@ rightside = MotorGroup(frontright,backright)
 leftside = MotorGroup(frontleft,backleft)
 intake = Motor(Ports.PORT5,GearSetting.RATIO_18_1,True)
 catapult1 = Motor(Ports.PORT6,GearSetting.RATIO_18_1,False)
-catapult2 = Motor(Ports.PORT7,GearSetting.RATIO_18_1,True)
-catapult = MotorGroup(catapult1, catapult2)
 wings1 = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
-triballsens = Limit(brain.three_wire_port.c)
 
 player=Controller()
 
@@ -34,11 +31,11 @@ def wings(exp=True):
   wings1.set(exp)
   wings2.set(exp)
 def windup():
-  catapult.set_stopping(HOLD)
-  catapult.spin(FORWARD)
-  while catapult.efficiency() > 50:
-    wait(10,MSEC)
-  catapult.stop()
+  catapult.spin_for(FORWARD,3/4,TURNS,wait=True) # tunear pls
+  while player.buttonR2.pressing():
+    wait(5,MSEC)
+def release():
+  catapult.spin_for(FORWARD,1/4,TURNS,wait=True) # tunear tmb, amenos que sea sensor-based
 def setup(value=0):
   if value == 1:
     rightside.set_velocity(50,PERCENT)
@@ -65,17 +62,13 @@ def intakefunc():
     else:
       intake.stop()
 def laCATAPULTA():
-  catapult.set_velocity(100,PERCENT)
-  catapult.set_stopping(COAST)
   while True:
-    while player.buttonUp.pressing():
-      catapult.spin(FORWARD)
+    while not player.buttonR2.pressing():
       wait(5,MSEC)
-    while player.buttonDown.pressing():
-      catapult.spin(REVERSE)
+    windup()
+    while not player.buttonR2.pressing():
       wait(5,MSEC)
-    catapult.stop()
-    wait(5,MSEC)
+    release()
 def wingManager():
   while True:
     if player.buttonR1.pressing():
@@ -125,16 +118,11 @@ def autonTime():
     move(46)
     turn(90)
     move(26)
-    intake.spin_for(FORWARD,4,TURNS,wait=False)
-    
-    wait(1000,MSEC)
+    intake.spin_for(FORWARD,4,TURNS,wait=True)
+    wait(15,MSEC)
     turn(-10)
     move(-1)
     catapult.spin_for(FORWARD,0.5,TURNS,wait=False)
-    
-    
-
-
   elif auton == 'defen':
     intake.spin_for(FORWARD,1,TURNS,wait=False)
     move(49)
