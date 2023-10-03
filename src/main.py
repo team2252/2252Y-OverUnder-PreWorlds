@@ -36,6 +36,8 @@ def windup():
     wait(5,MSEC)
 def release():
   catapult.spin_for(FORWARD,1/4,TURNS,wait=True) # tunear tmb, amenos que sea sensor-based
+  while player.buttonR2.pressing():
+    wait(5,MSEC)
 def setup(value=0):
   if value == 1:
     rightside.set_velocity(50,PERCENT)
