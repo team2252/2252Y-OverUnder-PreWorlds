@@ -21,9 +21,10 @@ backright = Motor(Ports.PORT4,GearSetting.RATIO_6_1,False)
 rightside = MotorGroup(frontright,backright)
 leftside = MotorGroup(frontleft,backleft)
 intake = Motor(Ports.PORT5,GearSetting.RATIO_18_1,True)
-catapult1 = Motor(Ports.PORT6,GearSetting.RATIO_18_1,False)
+catapult = Motor(Ports.PORT6,GearSetting.RATIO_18_1,False)
 wings1 = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
+catsens = Limit(brain.three_wire_port.c)
 
 player=Controller()
 
@@ -31,11 +32,17 @@ def wings(exp=True):
   wings1.set(exp)
   wings2.set(exp)
 def windup():
-  catapult.spin_for(FORWARD,3/4,TURNS,wait=True) # tunear pls
+  catapult.spin(FORWARD)
+  while not catsens.pressing():
+    wait(5,MSEC)
+  catapult.stop()
   while player.buttonR2.pressing():
     wait(5,MSEC)
 def release():
-  catapult.spin_for(FORWARD,1/4,TURNS,wait=True) # tunear tmb, amenos que sea sensor-based
+  catapult.spin(FORWARD)
+  while catsens.pressing():
+    wait(5,MSEC)
+  catapult.stop()
   while player.buttonR2.pressing():
     wait(5,MSEC)
 def setup(value=0):
