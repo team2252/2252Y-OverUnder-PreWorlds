@@ -33,17 +33,15 @@ def wings(exp=True):
   wings1.set(exp)
   wings2.set(exp)
 def windup():
-  catapult.spin(FORWARD)
-  while not catsens.pressing():
-    wait(5,MSEC)
-  catapult.stop()
-  while player.buttonR2.pressing():
-    wait(5,MSEC)
+  catapult.set_velocity(100,PERCENT)
+  while True:
+    catapult.spin(FORWARD)
+    if triballsens.pressing():
+      catapult.spin_for(FORWARD,1//8,TURNS,wait-True)
+      wait(5,MSEC)
+      break
 def release():
-  catapult.spin(FORWARD)
-  while catsens.pressing():
-    wait(5,MSEC)
-  catapult.stop()
+  catapult.spin_for(FORWARD,1/4,TURNS,wait=True)
   while player.buttonR2.pressing():
     wait(5,MSEC)
 def detectAuton():
