@@ -9,7 +9,7 @@
 # region --------conf--------
 # Library imports
 from vex import *
-auton = 'offen' # selección de autonomo. defen/offen
+# selección de autonomo fisico :)
 
 # Brain should be defined by default
 brain=Brain()
@@ -25,6 +25,7 @@ catapult = Motor(Ports.PORT6,GearSetting.RATIO_18_1,False)
 wings1 = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
 catsens = Limit(brain.three_wire_port.c)
+autonSel = Optical(Ports.PORT9,False)
 
 player=Controller()
 
@@ -45,10 +46,22 @@ def release():
   catapult.stop()
   while player.buttonR2.pressing():
     wait(5,MSEC)
+def detectAuton():
+  autonSel.set_light(LedStateType.ON)
+  autonSel.set_light_power(50,PERCENT)
+  if autonSel.color()==Color.BLACK:
+    tmp =  'offen' # negro es offen side
+  elif autonSel.color==Color.WHITE:
+    tmp = 'defen' # blanco es defen side
+  else:
+    tmp = '' # no auton
+  autonSel.set_light(LedStateType.OFF)
+  return tmp
 def setup(value=0):
   if value == 1:
     rightside.set_velocity(50,PERCENT)
     leftside.set_velocity(50,PERCENT)
+    auton = detectAuton()
   else: 
     intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
   wings(False)
@@ -141,7 +154,8 @@ def autonTime():
     move(-20)
     turn(-45)
     move(34+(34*1.5))
-    
+  else:
+    pass
 # endregion 
 # region ------comp funcs---------
 def startDrivers():
