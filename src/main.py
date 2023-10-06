@@ -45,20 +45,24 @@ def release():
   catapult.stop()
 def detectAuton():
   autonSel.set_light(LedStateType.ON)
-  autonSel.set_light_power(50)
-  wait(20,MSEC)
+  autonSel.set_light_power(25)
+  wait(100,MSEC)
   if autonSel.is_near_object():
       color = autonSel.brightness()
       if color >= 10:
+          brain.screen.print("defen\n")
           tmp = "defen"
       elif color < 10:
+          brain.screen.print("offen\n")
           tmp = 'offen'
   else:
+      brain.screen.print("nada\n")
       tmp = ''
   autonSel.set_light(LedStateType.OFF)
   return tmp
 def setup(value=0):
   if value == 1:
+    global auton
     rightside.set_velocity(50,PERCENT)
     leftside.set_velocity(50,PERCENT)
     auton = detectAuton()
