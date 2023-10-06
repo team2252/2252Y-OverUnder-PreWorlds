@@ -9,7 +9,7 @@
 # region --------conf--------
 # Library imports
 from vex import *
-# selección de autonomo fisico :)
+auton = 'offen' # selección de autonomo fisico :)
 
 # Brain should be defined by default
 brain=Brain()
@@ -25,7 +25,7 @@ catapult = Motor(Ports.PORT6,GearSetting.RATIO_18_1,False)
 wings1 = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
 catsens = Limit(brain.three_wire_port.c)
-autonSel = Optical(Ports.PORT9,False)
+autonSel = Optical(Ports.PORT9)
 
 player=Controller()
 
@@ -36,8 +36,8 @@ def windup():
   catapult.set_velocity(100,PERCENT)
   while True:
     catapult.spin(FORWARD)
-    if triballsens.pressing():
-      catapult.spin_for(FORWARD,1//8,TURNS,wait-True)
+    if catsens.pressing():
+      catapult.spin_for(FORWARD,1/8,TURNS,wait=True)
       wait(5,MSEC)
       break
 def release():
@@ -46,7 +46,7 @@ def release():
     wait(5,MSEC)
 def detectAuton():
   autonSel.set_light(LedStateType.ON)
-  autonSel.set_light_power(50,PERCENT)
+  autonSel.set_light_power(50)
   if autonSel.color()==Color.BLACK:
     tmp =  'offen' # negro es offen side
   elif autonSel.color==Color.WHITE:
@@ -75,7 +75,7 @@ def joystickfunc():
 def intakefunc():
   intake.set_velocity(100,PERCENT)
   while True:
-    if player.buttonL2.pressing() and not triballsens.pressing():
+    if player.buttonL2.pressing():
       intake.spin(FORWARD)
     elif player.buttonL1.pressing():
       intake.spin(REVERSE)
@@ -140,7 +140,7 @@ def autonTime():
     move(26)
     intake.spin_for(FORWARD,4,TURNS,wait=True)
     wait(15,MSEC)
-    turn(-10)
+    turn(-15)
     move(-1)
     catapult.spin_for(FORWARD,0.5,TURNS,wait=False)
   elif auton == 'defen':
