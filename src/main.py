@@ -26,6 +26,7 @@ wings1 = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
 catsens = Limit(brain.three_wire_port.c)
 autonSel = Optical(Ports.PORT9)
+matchload = Motor(Ports.PORT8,GearSetting.RATIO_18_1,False)
 
 player=Controller()
 
@@ -45,8 +46,8 @@ def release():
   catapult.stop()
 def detectAuton():
   autonSel.set_light(LedStateType.ON)
-  autonSel.set_light_power(25)
-  wait(100,MSEC)
+  autonSel.set_light_power(50)
+  wait(200,MSEC)
   if autonSel.is_near_object():
       color = autonSel.brightness()
       if color >= 10:
@@ -88,6 +89,15 @@ def intakefunc():
       intake.spin(REVERSE)
     else:
       intake.stop()
+def loadfunc():
+  matchload.set_velocity(50,PERCENT)
+  while True:
+    if player.buttonLeft.pressing():
+      matchload.spin(FORWARD)
+    elif player.buttonRight.pressing():
+      matchload.spin(REVERSE,0.7,Turns)
+    else:
+      matchload.stop()
 def laCATAPULTA():
   while True:
     while not player.buttonR2.pressing():
@@ -161,14 +171,37 @@ def autonTime():
     move(-1)
     catapult.spin_for(FORWARD,0.5,TURNS,wait=False)
   elif auton == 'defen':
-    intake.spin_for(FORWARD,1,TURNS,wait=False)
-    move(49)
+    intake.spin_for(FORWARD,0.5,TURNS,wait=False)
+    move(48)
     turn(-90)
-    move(10)
-    intake.spin_for(REVERSE,1.5,TURNS,wait=False)
-    move(-20)
+    intake.spin_for(REVERSE,1,TURNS,wait=False)
+    wait(100,MSEC)
+    intake.stop()
+    move(6)
+    wait(100,MSEC)
+    move(-25)
+    turn(47)
+    intake.spin_for(FORWARD,6,TURNS,wait=False)
+    move(5)
+    wait(100,MSEC)
+    move(-5)
     turn(-45)
-    move(34+(34*1.5))
+    wait(500,MSEC)
+    catapult.spin_for(FORWARD,1,TURNS,wait=False)
+    wait(100,MSEC)
+    windup()
+    turn(130)
+    intake.spin_for(FORWARD,6,TURNS,wait=False)
+    move(5)
+    wait(100,MSEC)
+    move(-5)
+    turn(-130)
+    wait(500,MSEC)
+    catapult.spin_for(FORWARD,0.5,TURNS,wait=False)
+    
+
+    
+
   else:
     pass
 # endregion 
@@ -194,6 +227,7 @@ driverTime(intakefunc)
 driverTime(wingManager)
 driverTime(laCATAPULTA)
 driverTime(matchLoad)
+driverTime(loadfunc)
 wait(15,MSEC)
 
 setup()
