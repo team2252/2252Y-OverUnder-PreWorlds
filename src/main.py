@@ -6,7 +6,7 @@
 # 	Description:  V5 project                                                   #
 #                                                                              #
 # ---------------------------------------------------------------------------- #
-# region --------conf--------
+# region ------------conf-------------
 # Library imports
 from vex import *
 auton = '' # selección de autonomo fisico :)
@@ -29,50 +29,8 @@ autonSel = Optical(Ports.PORT9)
 matchload = Motor(Ports.PORT8,GearSetting.RATIO_18_1,False)
 
 player=Controller()
-
-def wings(exp=True):
-  wings1.set(exp)
-  wings2.set(exp)
-def windup():
-  catapult.spin(FORWARD)
-  while not catsens.pressing():
-    wait(5,MSEC)
-  catapult.stop()
-  catapult.spin_for(FORWARD,1/8,TURNS,wait=True)
-def release():
-  catapult.spin(FORWARD)
-  while catsens.pressing():
-    wait(5,MSEC)
-  catapult.stop()
-def detectAuton():
-  autonSel.set_light(LedStateType.ON)
-  autonSel.set_light_power(50)
-  wait(200,MSEC)
-  if autonSel.is_near_object():
-      color = autonSel.brightness()
-      if color >= 10:
-          brain.screen.print("defen\n")
-          tmp = "defen"
-      elif color < 10:
-          brain.screen.print("offen\n")
-          tmp = 'offen'
-  else:
-      brain.screen.print("nada\n")
-      tmp = ''
-  autonSel.set_light(LedStateType.OFF)
-  return tmp
-def setup(value=0):
-  if value == 1:
-    global auton
-    rightside.set_velocity(50,PERCENT)
-    leftside.set_velocity(50,PERCENT)
-    auton = detectAuton()
-  else: 
-    intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
-  wings(False)
-  catapult.set_velocity(100,PERCENT)
 # endregion
-# region --------driver Funcs---------
+# region --------driver funcs---------
 def joystickfunc():
   leftside.spin(FORWARD)
   rightside.spin(FORWARD)
@@ -89,15 +47,6 @@ def intakefunc():
       intake.spin(REVERSE)
     else:
       intake.stop()
-def loadfunc():
-  matchload.set_velocity(50,PERCENT)
-  while True:
-    if player.buttonLeft.pressing():
-      matchload.spin(FORWARD)
-    elif player.buttonRight.pressing():
-      matchload.spin(REVERSE,0.7,Turns)
-    else:
-      matchload.stop()
 def laCATAPULTA():
   while True:
     while not player.buttonR2.pressing():
@@ -109,13 +58,14 @@ def laCATAPULTA():
     while player.buttonR2.pressing():
       wait(5,MSEC)
 def wingManager():
-  while True:
-    if player.buttonR1.pressing():
-      wings(True)
-      while player.buttonR1.pressing():
-        wait(10,MSEC)
-      wings(False)
+  both = Thread(R1Manager)
+  left = Thread(LWingManager)
+  right = Thread(RWingManager)
+  while (comp.is_driver_control() and comp.is_enabled()):
     wait(10,MSEC)
+  both.stop()
+  left.stop()
+  right.stop()
 def matchLoad():
   while True:
     while not player.buttonUp.pressing():
@@ -205,7 +155,7 @@ def autonTime():
   else:
     pass
 # endregion 
-# region ------comp funcs---------
+# region --------comp funcs-----------
 def startDrivers():
   setup(1)
   driverTime.broadcast()
@@ -220,6 +170,71 @@ def drivF():
     wait(10,MSEC)
   active.stop()
 # endregion
+# region --------other funcs----------
+def wings(exp=True):
+  wings1.set(exp)
+  wings2.set(exp)
+def windup():
+  catapult.spin(FORWARD)
+  while not catsens.pressing():
+    wait(5,MSEC)
+  catapult.stop()
+  catapult.spin_for(FORWARD,1/8,TURNS,wait=True)
+def release():
+  catapult.spin(FORWARD)
+  while catsens.pressing():
+    wait(5,MSEC)
+  catapult.stop()
+def detectAuton():
+  autonSel.set_light(LedStateType.ON)
+  autonSel.set_light_power(50)
+  wait(200,MSEC)
+  if autonSel.is_near_object():
+      color = autonSel.brightness()
+      if color >= 10: # type: ignore
+          brain.screen.print("defen\n")
+          tmp = "defen"
+      elif color < 10: # type: ignore
+          brain.screen.print("offen\n")
+          tmp = 'offen'
+  else:
+      brain.screen.print("nada\n")
+      tmp = ''
+  autonSel.set_light(LedStateType.OFF)
+  return tmp # type: ignore
+def setup(value=0):
+  if value == 1:
+    global auton
+    rightside.set_velocity(50,PERCENT)
+    leftside.set_velocity(50,PERCENT)
+    auton = detectAuton()
+  else: 
+    intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
+  wings(False)
+  catapult.set_velocity(100,PERCENT)
+def R1Manager():
+  while True:
+    if player.buttonR1.pressing():
+      wings(True)
+      while player.buttonR1.pressing():
+        wait(10,MSEC)
+      wings(False)
+    wait(10,MSEC)
+def LWingManager():
+  while True:
+    if player.buttonB.pressing() and not player.buttonR1.pressing():
+      wings1.set(True)
+      while player.buttonB.pressing():
+        wait(10,MSEC)
+      wings1.set(False)
+def RWingManager():
+  while True:
+    if player.buttonDown.pressing() and not player.buttonR1.pressing():
+      wings1.set(True)
+      while player.buttonDown.pressing():
+        wait(10,MSEC)
+      wings1.set(False)
+# endregion
 driverTime = Event()
 comp = Competition(drivF,autoF)
 driverTime(joystickfunc)
@@ -227,7 +242,6 @@ driverTime(intakefunc)
 driverTime(wingManager)
 driverTime(laCATAPULTA)
 driverTime(matchLoad)
-driverTime(loadfunc)
 wait(15,MSEC)
 
 setup()
