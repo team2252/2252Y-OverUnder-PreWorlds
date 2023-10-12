@@ -58,14 +58,12 @@ def laCATAPULTA():
     while player.buttonR2.pressing():
       wait(5,MSEC)
 def wingManager():
-  both = Thread(R1Manager)
-  left = Thread(LWingManager)
-  right = Thread(RWingManager)
-  while (comp.is_driver_control() and comp.is_enabled()):
-    wait(10,MSEC)
-  both.stop()
-  left.stop()
-  right.stop()
+  wingActivator = Event()
+  wingActivator(R1Manager)
+  wingActivator(LWingManager)
+  wingActivator(RWingManager)
+  wait(15,MSEC)
+  wingActivator.broadcast()
 def matchLoad():
   while True:
     while not player.buttonUp.pressing():
@@ -93,33 +91,37 @@ def turn(theta=90):
 def autonTime():
   setup(1)
   if auton == 'offen':
+    rightside.set_velocity(75,PERCENT)
+    leftside.set_velocity(75,PERCENT)
     intake.spin_for(FORWARD,0.5,TURNS,wait=False)
     move(48)
-    turn(90)
+    turn(85)
     intake.spin_for(REVERSE,1.5,TURNS,wait=False)
     wait(100,MSEC)
     move(9.4)
     intake.stop() 
-    move(-29)
+    move(-30)
     wings1.set(True)
-    wait(200,MSEC)
     rightside.set_velocity(75,PERCENT)
     leftside.set_velocity(75,PERCENT)
-    move(28)
+    wait(200,MSEC)
+    move(27.4)
     wait(10,MSEC)
+    wings1.set(False)
+    intake.spin_for(FORWARD,0.5,TURNS,wait=False)
+    move(-4.5)
     rightside.set_velocity(50,PERCENT)
     leftside.set_velocity(50,PERCENT)
-    wings1.set(False)
-    move(-4.5)
-    turn(90)
-    move(46)
-    turn(90)
-    move(26)
-    intake.spin_for(FORWARD,4,TURNS,wait=True)
-    wait(15,MSEC)
-    turn(-15)
-    move(-1)
-    catapult.spin_for(FORWARD,0.5,TURNS,wait=False)
+    turn(-150)
+    move(20)
+    intake.spin_for(FORWARD,1.5,TURNS,wait=False)
+    wait(100,MSEC)
+    move(-4)
+    turn(150)
+    move(8)
+    intake.spin_for(REVERSE,2,TURNS,wait=False)
+    move(12)
+    intake.stop()
   elif auton == 'defen':
     intake.spin_for(FORWARD,0.5,TURNS,wait=False)
     move(48)
@@ -184,7 +186,8 @@ def release():
   catapult.spin(FORWARD)
   while catsens.pressing():
     wait(5,MSEC)
-  catapult.stop()
+  wait(0.5,SECONDS)
+  catapult.spin_for(FORWARD,1,TURNS,wait=True)
 def detectAuton():
   autonSel.set_light(LedStateType.ON)
   autonSel.set_light_power(50)
@@ -199,7 +202,7 @@ def detectAuton():
           tmp = 'offen'
   else:
       brain.screen.print("nada\n")
-      tmp = ''
+      tmp = 'offen'
   autonSel.set_light(LedStateType.OFF)
   return tmp # type: ignore
 def setup(value=0):
@@ -222,18 +225,18 @@ def R1Manager():
     wait(10,MSEC)
 def LWingManager():
   while True:
-    if player.buttonB.pressing() and not player.buttonR1.pressing():
-      wings1.set(True)
-      while player.buttonB.pressing():
-        wait(10,MSEC)
-      wings1.set(False)
-def RWingManager():
-  while True:
     if player.buttonDown.pressing() and not player.buttonR1.pressing():
       wings1.set(True)
       while player.buttonDown.pressing():
         wait(10,MSEC)
       wings1.set(False)
+def RWingManager():
+  while True:
+    if player.buttonB.pressing() and not player.buttonR1.pressing():
+      wings2.set(True)
+      while player.buttonB.pressing():
+        wait(10,MSEC)
+      wings2.set(False)
 # endregion
 driverTime = Event()
 comp = Competition(drivF,autoF)
