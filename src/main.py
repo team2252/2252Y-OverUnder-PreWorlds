@@ -66,10 +66,10 @@ def wingManager():
   wingActivator.broadcast()
 def matchLoad():
   while True:
-    while not player.buttonUp.pressing():
+    while not player.buttonRight.pressing():
       wait(5,MSEC)
     catapult.spin(FORWARD)
-    while player.buttonUp.pressing():
+    while player.buttonRight.pressing():
       wait(5,MSEC)
     catapult.stop()
 # endregion
@@ -199,7 +199,7 @@ def detectAuton():
           tmp = "defen"
       elif color < 10: # type: ignore
           brain.screen.print("offen\n")
-          tmp = 'offen'
+          tmp = 'defen'
   else:
       brain.screen.print("nada\n")
       tmp = 'offen'
