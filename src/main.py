@@ -26,7 +26,8 @@ wings1 = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
 catsens = Limit(brain.three_wire_port.c)
 autonSel = Optical(Ports.PORT9)
-matchload = Motor(Ports.PORT8,GearSetting.RATIO_18_1,False)
+brazo = Motor(Ports.PORT8,GearSetting.RATIO_18_1,False)
+wedge = DigitalOut(brain.three_wire_port.d)
 
 player=Controller()
 # endregion
@@ -41,37 +42,51 @@ def joystickfunc():
 def intakefunc():
   intake.set_velocity(100,PERCENT)
   while True:
-    if player.buttonL2.pressing():
+    if player.buttonL2.pressing() and not player.buttonRight.pressing():
       intake.spin(FORWARD)
-    elif player.buttonL1.pressing():
+    elif player.buttonL1.pressing() and not player.buttonRight.pressing():
       intake.spin(REVERSE)
     else:
       intake.stop()
 def laCATAPULTA():
   while True:
-    while not player.buttonR2.pressing():
+    while not player.buttonR2.pressing() and not player.buttonRight.pressing():
       wait(5,MSEC)
     if catsens.pressing():
       release()
+      windup()
     else:
       windup()
-    while player.buttonR2.pressing():
+    while player.buttonR2.pressing() and not player.buttonRight.pressing():
       wait(5,MSEC)
-def wingManager():
+def pistonManager():
   wingActivator = Event()
   wingActivator(R1Manager)
   wingActivator(LWingManager)
   wingActivator(RWingManager)
+  wingActivator(wedgeF)
   wait(15,MSEC)
   wingActivator.broadcast()
 def matchLoad():
   while True:
-    while not player.buttonRight.pressing():
+    while player.buttonRight.pressing() and player.buttonR2.pressing():
       wait(5,MSEC)
     catapult.spin(FORWARD)
-    while player.buttonRight.pressing():
+    while not (player.buttonRight.pressing() and player.buttonR2.pressing()):
       wait(5,MSEC)
     catapult.stop()
+def azoteo():
+  while True:
+    while not (player.buttonL2.pressing() and player.buttonRight.pressing()):
+      wait(5,MSEC)
+    brazo.spin_for(FORWARD,1/2,TURNS,wait=True)
+    while player.buttonL2.pressing() and player.buttonRight.pressing():
+      wait(5,MSEC)
+    while not(player.buttonL2.pressing() and player.buttonRight.pressing()):
+      wait(5,MSEC)
+      brazo.spin_for(REVERSE,1/2,TURNS,wait=True)
+    while player.buttonL2.pressing() and player.buttonRight.pressing():
+      wait(5,MSEC)
 # endregion
 # region --------auton funcs----------
 def move(dis=float(24)):
@@ -105,7 +120,7 @@ def autonTime():
     rightside.set_velocity(75,PERCENT)
     leftside.set_velocity(75,PERCENT)
     wait(200,MSEC)
-    move(27.4)
+    move(29)
     wait(10,MSEC)
     wings1.set(False)
     intake.spin_for(FORWARD,0.5,TURNS,wait=False)
@@ -117,11 +132,14 @@ def autonTime():
     intake.spin_for(FORWARD,1.5,TURNS,wait=False)
     wait(100,MSEC)
     move(-4)
-    turn(150)
+    turn(160)
     move(8)
+    intake.spin_for(REVERSE,2,TURNS,wait=True)
     intake.spin_for(REVERSE,2,TURNS,wait=False)
-    move(12)
+    move(13)
     intake.stop()
+    move(-10)
+    windup()
   elif auton == 'defen':
     intake.spin_for(FORWARD,0.5,TURNS,wait=False)
     move(48)
@@ -187,7 +205,6 @@ def release():
   while catsens.pressing():
     wait(5,MSEC)
   wait(0.5,SECONDS)
-  catapult.spin_for(FORWARD,1,TURNS,wait=True)
 def detectAuton():
   autonSel.set_light(LedStateType.ON)
   autonSel.set_light_power(50)
@@ -237,14 +254,28 @@ def RWingManager():
       while player.buttonB.pressing():
         wait(10,MSEC)
       wings2.set(False)
+def wedgeF():
+  wedge.set(False)
+  while True:
+    while not player.buttonY.pressing():
+      wait(5,MSEC)
+    wedge.set(True)
+    while player.buttonY.pressing():
+      wait(5,MSEC)
+    while not player.buttonY.pressing():
+      wait(5,MSEC)
+    wedge.set(False)
+    while player.buttonY.pressing():
+      wait(5,MSEC)
 # endregion
 driverTime = Event()
 comp = Competition(drivF,autoF)
 driverTime(joystickfunc)
 driverTime(intakefunc)
-driverTime(wingManager)
+driverTime(pistonManager)
 driverTime(laCATAPULTA)
 driverTime(matchLoad)
+driverTime(azoteo)
 wait(15,MSEC)
 
 setup()
