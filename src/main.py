@@ -30,6 +30,7 @@ brazo = Motor(Ports.PORT8,GearSetting.RATIO_18_1,False)
 wedge = DigitalOut(brain.three_wire_port.d)
 
 player=Controller()
+modkey = player.buttonRight
 # endregion
 # region --------driver funcs---------
 def joystickfunc():
@@ -42,22 +43,42 @@ def joystickfunc():
 def intakefunc():
   intake.set_velocity(100,PERCENT)
   while True:
-    if player.buttonL2.pressing() and not player.buttonRight.pressing():
+    if player.buttonL2.pressing() and not modkey.pressing():
       intake.spin(FORWARD)
-    elif player.buttonL1.pressing() and not player.buttonRight.pressing():
+    elif player.buttonL1.pressing() and not modkey.pressing():
       intake.spin(REVERSE)
     else:
       intake.stop()
 def laCATAPULTA():
   while True:
-    while not player.buttonR2.pressing() and not player.buttonRight.pressing():
+    while not (player.buttonR2.pressing() and not modkey.pressing()):
       wait(5,MSEC)
     if catsens.pressing():
       release()
       windup()
     else:
       windup()
-    while player.buttonR2.pressing() and not player.buttonRight.pressing():
+    while player.buttonR2.pressing() and not modkey.pressing():
+      wait(5,MSEC)
+def matchLoad():
+  while True:
+    while not (modkey.pressing() and player.buttonR2.pressing()):
+      wait(5,MSEC)
+    catapult.spin(FORWARD)
+    while (modkey.pressing() and player.buttonR2.pressing()):
+      wait(5,MSEC)
+    catapult.stop()
+def azoteo():
+  while True:
+    while not (player.buttonL2.pressing() and modkey.pressing()):
+      wait(5,MSEC)
+    brazo.spin_for(FORWARD,1/2,TURNS,wait=True)
+    while player.buttonL2.pressing() and modkey.pressing():
+      wait(5,MSEC)
+    while not(player.buttonL2.pressing() and modkey.pressing()):
+      wait(5,MSEC)
+      brazo.spin_for(REVERSE,1/2,TURNS,wait=True)
+    while player.buttonL2.pressing() and modkey.pressing():
       wait(5,MSEC)
 def pistonManager():
   wingActivator = Event()
@@ -67,26 +88,6 @@ def pistonManager():
   wingActivator(wedgeF)
   wait(15,MSEC)
   wingActivator.broadcast()
-def matchLoad():
-  while True:
-    while player.buttonRight.pressing() and player.buttonR2.pressing():
-      wait(5,MSEC)
-    catapult.spin(FORWARD)
-    while not (player.buttonRight.pressing() and player.buttonR2.pressing()):
-      wait(5,MSEC)
-    catapult.stop()
-def azoteo():
-  while True:
-    while not (player.buttonL2.pressing() and player.buttonRight.pressing()):
-      wait(5,MSEC)
-    brazo.spin_for(FORWARD,1/2,TURNS,wait=True)
-    while player.buttonL2.pressing() and player.buttonRight.pressing():
-      wait(5,MSEC)
-    while not(player.buttonL2.pressing() and player.buttonRight.pressing()):
-      wait(5,MSEC)
-      brazo.spin_for(REVERSE,1/2,TURNS,wait=True)
-    while player.buttonL2.pressing() and player.buttonRight.pressing():
-      wait(5,MSEC)
 # endregion
 # region --------auton funcs----------
 def move(dis=float(24)):
