@@ -42,44 +42,39 @@ def joystickfunc():
     wait(5,MSEC)
 def intakefunc():
   intake.set_velocity(100,PERCENT)
+  toggle = 0
   while True:
-    if player.buttonL2.pressing() and not modkey.pressing():
-      intake.spin(FORWARD)
-    elif player.buttonL1.pressing() and not modkey.pressing():
-      intake.spin(REVERSE)
+    if modkey.pressing():
+      if player.buttonL2.pressing() and toggle == 0:
+        brazo.spin_for(FORWARD,1/2,TURNS,wait=False)
+        waituntil(not player.buttonL2.pressing())
+        toggle = 1
+      elif player.buttonL2.pressing() and toggle == 1:
+        brazo.spin_for(REVERSE,1/2,TURNS,wait=False)
+        waituntil(not player.buttonL2.pressing())
+        toggle = 0
     else:
-      intake.stop()
+      if player.buttonL2.pressing():
+        intake.spin(FORWARD)
+      elif player.buttonL1.pressing():
+        intake.spin(REVERSE)
+      else:
+        intake.stop()
 def laCATAPULTA():
   while True:
-    while not (player.buttonR2.pressing() and not modkey.pressing()):
-      wait(5,MSEC)
-    if catsens.pressing():
-      release()
-      windup()
+    if modkey.pressing():
+      if player.buttonR2.pressing():
+        catapult.spin(FORWARD)
+        waituntil(not player.buttonR2.pressing())
+        catapult.stop()
     else:
-      windup()
-    while player.buttonR2.pressing() and not modkey.pressing():
-      wait(5,MSEC)
-def matchLoad():
-  while True:
-    while not (modkey.pressing() and player.buttonR2.pressing()):
-      wait(5,MSEC)
-    catapult.spin(FORWARD)
-    while (modkey.pressing() and player.buttonR2.pressing()):
-      wait(5,MSEC)
-    catapult.stop()
-def azoteo():
-  while True:
-    while not (player.buttonL2.pressing() and modkey.pressing()):
-      wait(5,MSEC)
-    brazo.spin_for(FORWARD,1/2,TURNS,wait=True)
-    while player.buttonL2.pressing() and modkey.pressing():
-      wait(5,MSEC)
-    while not(player.buttonL2.pressing() and modkey.pressing()):
-      wait(5,MSEC)
-      brazo.spin_for(REVERSE,1/2,TURNS,wait=True)
-    while player.buttonL2.pressing() and modkey.pressing():
-      wait(5,MSEC)
+      if player.buttonR2.pressing():
+        if catsens.pressing():
+          release()
+          windup()
+        else:
+          windup()
+        waituntil(not player.buttonR2.pressing())
 def pistonManager():
   wingActivator = Event()
   wingActivator(R1Manager)
@@ -192,6 +187,9 @@ def drivF():
   active.stop()
 # endregion
 # region --------other funcs----------
+def waituntil(ocasion):
+  while not ocasion:
+    wait(5,MSEC)
 def wings(exp=True):
   wings1.set(exp)
   wings2.set(exp)
@@ -237,37 +235,30 @@ def R1Manager():
   while True:
     if player.buttonR1.pressing():
       wings(True)
-      while player.buttonR1.pressing():
-        wait(10,MSEC)
+      waituntil(not player.buttonR1.pressing())
       wings(False)
     wait(10,MSEC)
 def LWingManager():
   while True:
     if player.buttonDown.pressing() and not player.buttonR1.pressing():
       wings1.set(True)
-      while player.buttonDown.pressing():
-        wait(10,MSEC)
+      waituntil(not player.buttonDown.pressing())
       wings1.set(False)
 def RWingManager():
   while True:
     if player.buttonB.pressing() and not player.buttonR1.pressing():
       wings2.set(True)
-      while player.buttonB.pressing():
-        wait(10,MSEC)
+      waituntil(not player.buttonB.pressing())
       wings2.set(False)
 def wedgeF():
   wedge.set(False)
   while True:
-    while not player.buttonY.pressing():
-      wait(5,MSEC)
+    waituntil(player.buttonY.pressing())
     wedge.set(True)
-    while player.buttonY.pressing():
-      wait(5,MSEC)
-    while not player.buttonY.pressing():
-      wait(5,MSEC)
+    waituntil(not player.buttonY.pressing())
+    waituntil(player.buttonY.pressing())
     wedge.set(False)
-    while player.buttonY.pressing():
-      wait(5,MSEC)
+    waituntil(not player.buttonY.pressing())
 # endregion
 driverTime = Event()
 comp = Competition(drivF,autoF)
@@ -275,8 +266,6 @@ driverTime(joystickfunc)
 driverTime(intakefunc)
 driverTime(pistonManager)
 driverTime(laCATAPULTA)
-driverTime(matchLoad)
-driverTime(azoteo)
 wait(15,MSEC)
 
 setup()
