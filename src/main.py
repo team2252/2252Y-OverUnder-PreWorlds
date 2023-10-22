@@ -171,6 +171,13 @@ def autonTime():
     pass
 # endregion 
 # region --------comp funcs-----------
+def startDriver():
+  global controlPoint
+  drivbranch = Event()
+  for point in controlPoint:
+    drivbranch(point)
+  wait(15,MSEC)
+  drivbranch.broadcast()
 def autoF():
   active = Thread(autonTime)
   while (comp.is_autonomous() and comp.is_enabled()):
@@ -178,14 +185,9 @@ def autoF():
   active.stop()
 def drivF():
   setup(1)
-  controlPoint = [joystickfunc,intakefunc,laCATAPULTA,matchLoad,pistonManager]
-  iters = []
-  for func in controlPoint:
-    active = Thread(func)
-    iters.append(active)
+  active = Thread(startDriver)
   waituntil(not (comp.is_driver_control() and comp.is_enabled()))
-  for active in iters:
-    active.stop()
+  active.stop()
 # endregion
 # region --------other funcs----------
 def waituntil(ocasion):
@@ -263,6 +265,6 @@ def wedgeF():
     waituntil(not player.buttonY.pressing())
 # endregion
 comp = Competition(drivF,autoF)
-wait(15,MSEC)
+controlPoint = [joystickfunc,intakefunc,laCATAPULTA,matchLoad,pistonManager,slapper]
 
 setup()
