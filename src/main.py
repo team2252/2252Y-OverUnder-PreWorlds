@@ -26,7 +26,7 @@ wings1 = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
 catsens = Limit(brain.three_wire_port.c)
 autonSel = Optical(Ports.PORT9)
-brazo = Motor(Ports.PORT8,GearSetting.RATIO_18_1,False)
+brazo = Motor(Ports.PORT10,GearSetting.RATIO_18_1,False)
 wedge = DigitalOut(brain.three_wire_port.d)
 
 player=Controller()
@@ -48,35 +48,22 @@ def intakefunc():
       intake.spin(REVERSE)
     else:
       intake.stop()
-def slapper():
-  toggle = 0
-  brazo.set_velocity(100,PERCENT)
-  while True:
-    waituntil(player.buttonUp.pressing())
-    if toggle == 0:
-      brazo.spin_for(FORWARD,1/2,TURNS,wait=True)
-      waituntil(not player.buttonUp.pressing())
-      toggle = 1
-    elif toggle == 1:
-      brazo.spin_for(REVERSE,1/2,TURNS,wait=True)
-      waituntil(not player.buttonUp.pressing())
-      toggle = 0
-    else: waituntil(not player.buttonUp.pressing())
 def laCATAPULTA():
   while True:
-    waituntil(player.buttonR2.pressing())
-    if catsens.pressing():
-      release()
-      windup()
-    else:
-      windup()
-    waituntil(not player.buttonR2.pressing())
-def pistonManager():
+    while not player.buttonR2.pressing():
+      wait(5,MSEC)
+      if catsens.pressing():
+        release()
+        windup()
+      else:
+        windup()
+      while player.buttonR2.pressing():
+        wait(5,MSEC)
+def wingManager():
   wingActivator = Event()
   wingActivator(R1Manager)
   wingActivator(LWingManager)
   wingActivator(RWingManager)
-  wingActivator(wedgeF)
   wait(15,MSEC)
   wingActivator.broadcast()
 def matchLoad():
@@ -87,6 +74,7 @@ def matchLoad():
     while player.buttonRight.pressing():
       wait(5,MSEC)
     catapult.stop()
+
 # endregion
 # region --------auton funcs----------
 def move(dis=float(24)):
@@ -172,12 +160,7 @@ def autonTime():
 # endregion 
 # region --------comp funcs-----------
 def startDriver():
-  global controlPoint
-  drivbranch = Event()
-  for point in controlPoint:
-    drivbranch(point)
-  wait(15,MSEC)
-  drivbranch.broadcast()
+  driver.broadcast()
 def autoF():
   active = Thread(autonTime)
   while (comp.is_autonomous() and comp.is_enabled()):
@@ -264,7 +247,14 @@ def wedgeF():
       toggle = 0
     waituntil(not player.buttonY.pressing())
 # endregion
+driver = Event()
 comp = Competition(drivF,autoF)
-controlPoint = [joystickfunc,intakefunc,laCATAPULTA,matchLoad,pistonManager,slapper]
+driver(joystickfunc)
+driver(intakefunc)
+driver(laCATAPULTA)
+driver(matchLoad)
+driver(wingManager)
+wait(15,MSEC)
+controlPoint = [joystickfunc,intakefunc,laCATAPULTA,matchLoad,wingManager]
 
 setup()
