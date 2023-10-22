@@ -26,7 +26,8 @@ wings1 = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
 catsens = Limit(brain.three_wire_port.c)
 autonSel = Optical(Ports.PORT9)
-matchload = Motor(Ports.PORT8,GearSetting.RATIO_18_1,False)
+brazo = Motor(Ports.PORT8,GearSetting.RATIO_18_1,False)
+wedge = DigitalOut(brain.three_wire_port.d)
 
 player=Controller()
 modkey = player.buttonRight
@@ -126,7 +127,7 @@ def autonTime():
     rightside.set_velocity(75,PERCENT)
     leftside.set_velocity(75,PERCENT)
     wait(200,MSEC)
-    move(27.4)
+    move(29)
     wait(10,MSEC)
     wings1.set(False)
     intake.spin_for(FORWARD,0.5,TURNS,wait=False)
@@ -138,11 +139,13 @@ def autonTime():
     intake.spin_for(FORWARD,1.5,TURNS,wait=False)
     wait(100,MSEC)
     move(-4)
-    turn(150)
+    turn(160)
     move(8)
     intake.spin_for(REVERSE,2,TURNS,wait=False)
     move(12)
     intake.stop()
+    move(-10)
+    windup()
   elif auton == 'defen':
     intake.spin_for(FORWARD,0.5,TURNS,wait=False)
     move(48)
@@ -171,10 +174,6 @@ def autonTime():
     turn(-130)
     wait(500,MSEC)
     catapult.spin_for(FORWARD,0.5,TURNS,wait=False)
-    
-
-    
-
   else:
     pass
 # endregion 
