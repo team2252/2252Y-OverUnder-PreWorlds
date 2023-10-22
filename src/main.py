@@ -52,20 +52,13 @@ def laCATAPULTA():
   while True:
     while not player.buttonR2.pressing():
       wait(5,MSEC)
-      if catsens.pressing():
-        release()
-        windup()
-      else:
-        windup()
-      while player.buttonR2.pressing():
-        wait(5,MSEC)
-def wingManager():
-  wingActivator = Event()
-  wingActivator(R1Manager)
-  wingActivator(LWingManager)
-  wingActivator(RWingManager)
-  wait(15,MSEC)
-  wingActivator.broadcast()
+    if catsens.pressing():
+      release()
+      windup()
+    else:
+      windup()
+    while player.buttonR2.pressing():
+      wait(5,MSEC)
 def matchLoad():
   while True:
     while not player.buttonRight.pressing():
@@ -74,7 +67,14 @@ def matchLoad():
     while player.buttonRight.pressing():
       wait(5,MSEC)
     catapult.stop()
-
+def wingManager():
+  wingActivator = Event()
+  wingActivator(R1Manager)
+  wingActivator(LWingManager)
+  wingActivator(RWingManager)
+  wingActivator(wedgeF)
+  wait(15,MSEC)
+  wingActivator.broadcast()
 # endregion
 # region --------auton funcs----------
 def move(dis=float(24)):
