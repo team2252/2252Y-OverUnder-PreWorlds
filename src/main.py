@@ -42,24 +42,26 @@ def joystickfunc():
     wait(5,MSEC)
 def intakefunc():
   intake.set_velocity(100,PERCENT)
-  toggle = 0
   while True:
-    if modkey.pressing():
-      if player.buttonL2.pressing() and toggle == 0:
-        brazo.spin_for(FORWARD,1/2,TURNS,wait=False)
-        waituntil(not player.buttonL2.pressing())
-        toggle = 1
-      elif player.buttonL2.pressing() and toggle == 1:
-        brazo.spin_for(REVERSE,1/2,TURNS,wait=False)
-        waituntil(not player.buttonL2.pressing())
-        toggle = 0
+    if player.buttonL2.pressing() and not modkey.pressing():
+      intake.spin(FORWARD)
+    elif player.buttonL1.pressing():
+      intake.spin(REVERSE)
     else:
-      if player.buttonL2.pressing():
-        intake.spin(FORWARD)
-      elif player.buttonL1.pressing():
-        intake.spin(REVERSE)
-      else:
-        intake.stop()
+      intake.stop()
+def slapper():
+  toggle = 0
+  brazo.set_velocity(100,PERCENT)
+  while True:
+    if player.buttonL2.pressing() and toggle == 0 and modkey.pressing():
+      brazo.spin_for(FORWARD,1/2,TURNS,wait=True)
+      waituntil(not player.buttonL2.pressing() or not modkey.pressing())
+      toggle = 1
+    elif player.buttonL2.pressing() and toggle == 1 and modkey.pressing():
+      brazo.spin_for(REVERSE,1/2,TURNS,wait=True)
+      waituntil(not player.buttonL2.pressing() or not modkey.pressing())
+      toggle = 0
+    wait(5,MSEC)
 def laCATAPULTA():
   while True:
     if modkey.pressing():
@@ -75,6 +77,7 @@ def laCATAPULTA():
         else:
           windup()
         waituntil(not player.buttonR2.pressing())
+    wait(5,MSEC)
 def pistonManager():
   wingActivator = Event()
   wingActivator(R1Manager)
@@ -266,6 +269,7 @@ driverTime(joystickfunc)
 driverTime(intakefunc)
 driverTime(pistonManager)
 driverTime(laCATAPULTA)
+driverTime(slapper)
 wait(15,MSEC)
 
 setup()
