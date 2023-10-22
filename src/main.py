@@ -30,7 +30,6 @@ brazo = Motor(Ports.PORT8,GearSetting.RATIO_18_1,False)
 wedge = DigitalOut(brain.three_wire_port.d)
 
 player=Controller()
-modkey = player.buttonRight
 # endregion
 # region --------driver funcs---------
 def joystickfunc():
@@ -53,37 +52,31 @@ def slapper():
   toggle = 0
   brazo.set_velocity(100,PERCENT)
   while True:
-    waituntil(player.buttonL2.pressing())
-    if toggle == 0 and modkey.pressing():
+    waituntil(player.buttonUp.pressing())
+    if toggle == 0:
       brazo.spin_for(FORWARD,1/2,TURNS,wait=True)
-      waituntil(not player.buttonL2.pressing() or not modkey.pressing())
+      waituntil(not player.buttonUp.pressing())
       toggle = 1
-    elif toggle == 1 and modkey.pressing():
+    elif toggle == 1:
       brazo.spin_for(REVERSE,1/2,TURNS,wait=True)
-      waituntil(not player.buttonL2.pressing() or not modkey.pressing())
+      waituntil(not player.buttonUp.pressing())
       toggle = 0
-    else: waituntil(not player.buttonL2.pressing())
-    wait(5,MSEC)
-def laCATAPULTA(): # Thread o separar (separar suena mejor)
+    else: waituntil(not player.buttonUp.pressing())
+def laCATAPULTA():
   while True:
     waituntil(player.buttonR2.pressing())
-    if modkey.pressing():
-      catapult.spin(FORWARD)
-      waituntil(not player.buttonR2.pressing())
-      catapult.stop()
+    if catsens.pressing():
+      release()
+      windup()
     else:
-      if catsens.pressing():
-        release()
-        windup()
-      else:
-        windup()
-      waituntil(not player.buttonR2.pressing())
-    wait(5,MSEC)
+      windup()
+    waituntil(not player.buttonR2.pressing())
 def pistonManager():
   wingActivator = Event()
   wingActivator(R1Manager)
   wingActivator(LWingManager)
   wingActivator(RWingManager)
+  wingActivator(wedgeF)
   wait(15,MSEC)
   wingActivator.broadcast()
 def matchLoad():
@@ -185,7 +178,7 @@ def autoF():
   active.stop()
 def drivF():
   setup(1)
-  controlPoint = [joystickfunc,intakefunc,laCATAPULTA,slapper,pistonManager]
+  controlPoint = [joystickfunc,intakefunc,laCATAPULTA,matchLoad,pistonManager]
   iters = []
   for func in controlPoint:
     active = Thread(func)
