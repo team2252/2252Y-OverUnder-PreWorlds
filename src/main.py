@@ -26,8 +26,7 @@ wings1 = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
 catsens = Limit(brain.three_wire_port.c)
 autonSel = Optical(Ports.PORT9)
-brazo = Motor(Ports.PORT8,GearSetting.RATIO_18_1,False)
-wedge = DigitalOut(brain.three_wire_port.d)
+matchload = Motor(Ports.PORT8,GearSetting.RATIO_18_1,False)
 
 player=Controller()
 modkey = player.buttonRight
@@ -43,7 +42,7 @@ def joystickfunc():
 def intakefunc():
   intake.set_velocity(100,PERCENT)
   while True:
-    if player.buttonL2.pressing() and not modkey.pressing():
+    if player.buttonL2.pressing():
       intake.spin(FORWARD)
     elif player.buttonL1.pressing():
       intake.spin(REVERSE)
@@ -84,9 +83,16 @@ def pistonManager():
   wingActivator(R1Manager)
   wingActivator(LWingManager)
   wingActivator(RWingManager)
-  wingActivator(wedgeF)
   wait(15,MSEC)
   wingActivator.broadcast()
+def matchLoad():
+  while True:
+    while not player.buttonRight.pressing():
+      wait(5,MSEC)
+    catapult.spin(FORWARD)
+    while player.buttonRight.pressing():
+      wait(5,MSEC)
+    catapult.stop()
 # endregion
 # region --------auton funcs----------
 def move(dis=float(24)):
@@ -120,7 +126,7 @@ def autonTime():
     rightside.set_velocity(75,PERCENT)
     leftside.set_velocity(75,PERCENT)
     wait(200,MSEC)
-    move(29)
+    move(27.4)
     wait(10,MSEC)
     wings1.set(False)
     intake.spin_for(FORWARD,0.5,TURNS,wait=False)
@@ -132,14 +138,11 @@ def autonTime():
     intake.spin_for(FORWARD,1.5,TURNS,wait=False)
     wait(100,MSEC)
     move(-4)
-    turn(160)
+    turn(150)
     move(8)
-    intake.spin_for(REVERSE,2,TURNS,wait=True)
     intake.spin_for(REVERSE,2,TURNS,wait=False)
-    move(13)
+    move(12)
     intake.stop()
-    move(-10)
-    windup()
   elif auton == 'defen':
     intake.spin_for(FORWARD,0.5,TURNS,wait=False)
     move(48)
