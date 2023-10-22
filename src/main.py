@@ -64,7 +64,7 @@ def slapper():
       toggle = 0
     else: waituntil(not player.buttonL2.pressing())
     wait(5,MSEC)
-def laCATAPULTA():
+def laCATAPULTA(): # Thread o separar (separar suena mejor)
   while True:
     waituntil(player.buttonR2.pressing())
     if modkey.pressing():
@@ -176,19 +176,21 @@ def autonTime():
     pass
 # endregion 
 # region --------comp funcs-----------
-def startDrivers():
-  setup(1)
-  driverTime.broadcast()
 def autoF():
   active = Thread(autonTime)
   while (comp.is_autonomous() and comp.is_enabled()):
     wait(10,MSEC)
   active.stop()
 def drivF():
-  active = Thread(startDrivers)
-  while (comp.is_driver_control() and comp.is_enabled()):
-    wait(10,MSEC)
-  active.stop()
+  setup(1)
+  controlPoint = [joystickfunc,intakefunc,laCATAPULTA,slapper,pistonManager]
+  iters = []
+  for func in controlPoint:
+    active = Thread(func)
+    iters.append(active)
+  waituntil(not (comp.is_driver_control() and comp.is_enabled()))
+  for active in iters:
+    active.stop()
 # endregion
 # region --------other funcs----------
 def waituntil(ocasion):
@@ -265,13 +267,7 @@ def wedgeF():
       toggle = 0
     waituntil(not player.buttonY.pressing())
 # endregion
-driverTime = Event()
 comp = Competition(drivF,autoF)
-driverTime(joystickfunc)
-driverTime(intakefunc)
-driverTime(pistonManager)
-driverTime(laCATAPULTA)
-driverTime(slapper)
 wait(15,MSEC)
 
 setup()
