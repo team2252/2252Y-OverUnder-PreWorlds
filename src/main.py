@@ -276,6 +276,5 @@ driver(matchLoad)
 driver(wingManager)
 driver(hangfunc)
 wait(15,MSEC)
-controlPoint = [joystickfunc,intakefunc,laCATAPULTA,matchLoad,wingManager]
 
 setup()
