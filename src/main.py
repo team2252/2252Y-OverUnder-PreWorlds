@@ -132,15 +132,17 @@ def autonTime():
     move(-4)
     turn(160)
     move(8)
-    intake.spin_for(REVERSE,2,TURNS,wait=False)
-    move(12)
+    intake.spin_for(REVERSE,2,TURNS,wait=True)
+    move(13)
     intake.stop()
-    move(-25)
+    move(-28)
     turn(-90)
     move(-25)
-    brazo.spin_for(FORWARD,0.6,TURNS,wait=False)
     turn(-40)
-    #windup()
+    brazo.spin_for(FORWARD,0.55,TURNS,wait=False)
+    move(-8)
+    
+    
   elif auton == 'defen':
     intake.spin_for(FORWARD,0.5,TURNS,wait=False)
     move(48)
