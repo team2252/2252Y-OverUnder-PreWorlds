@@ -28,8 +28,13 @@ catsens = Limit(brain.three_wire_port.c)
 autonSel = Optical(Ports.PORT9)
 brazo = Motor(Ports.PORT10,GearSetting.RATIO_18_1,False)
 wedge = DigitalOut(brain.three_wire_port.d)
+gyro = Inertial(Ports.PORT11)
 
 player=Controller()
+
+gyro.calibrate()
+while gyro.is_calibrating():
+  wait(15,MSEC)
 # endregion
 # region --------driver funcs---------
 def joystickfunc():
@@ -88,12 +93,17 @@ def hangfunc():
 
 # endregion
 # region --------auton funcs----------
+def process(val):
+  if val > 0: return val
+  elif val < 0: return 360 - val
+  else: return 0
 def move(dis=float(24)):
   factor=5.5
   leftside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
   rightside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
   wait(5,MSEC)
 def turn(theta=90):
+  gyro.set_heading(0)
   rightside.set_velocity(30,PERCENT)
   leftside.set_velocity(30,PERCENT)
   factor=48
@@ -102,6 +112,22 @@ def turn(theta=90):
   rightside.set_velocity(50,PERCENT)
   leftside.set_velocity(50,PERCENT)
   wait(5,MSEC)
+  if theta < 0: finetune(theta,'l')
+  elif theta > 0: finetune(theta,'r')
+def finetune(val,dir):
+  val = process(val)
+  rightside.set_velocity(5,PERCENT)
+  leftside.set_velocity(5,PERCENT)
+  if (val + 2.5) < gyro.heading():
+    leftside.spin(REVERSE)
+    rightside.spin(FORWARD)
+  elif (val - 2.5) > gyro.heading():
+    leftside.spin(FORWARD)
+    rightside.spin(REVERSE)
+  while not (gyro.heading() < (val - 2.5) or gyro.heading() > (val + 2.5)):
+    wait(5,MSEC)
+  leftside.stop()
+  rightside.stop()
 def autonTime():
   setup(1)
   if auton == 'offen':
@@ -141,8 +167,6 @@ def autonTime():
     turn(-40)
     brazo.spin_for(FORWARD,0.55,TURNS,wait=False)
     move(-8)
-    
-    
   elif auton == 'defen':
     intake.spin_for(FORWARD,0.5,TURNS,wait=False)
     move(48)
