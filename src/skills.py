@@ -26,7 +26,8 @@ wings1 = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
 catsens = Limit(brain.three_wire_port.c)
 autonSel = Optical(Ports.PORT9)
-matchload = Motor(Ports.PORT8,GearSetting.RATIO_18_1,False)
+brazo = Motor(Ports.PORT10,GearSetting.RATIO_18_1,False)
+wedge = DigitalOut(brain.three_wire_port.d)
 
 player=Controller()
 # endregion
@@ -53,6 +54,8 @@ def laCATAPULTA():
       wait(5,MSEC)
     if catsens.pressing():
       release()
+      wait(15,MSEC)
+      windup()
     else:
       windup()
     while player.buttonR2.pressing():
@@ -62,6 +65,7 @@ def wingManager():
   wingActivator(R1Manager)
   wingActivator(LWingManager)
   wingActivator(RWingManager)
+  wingActivator(wedgeF)
   wait(15,MSEC)
   wingActivator.broadcast()
 def matchLoad():
@@ -72,6 +76,16 @@ def matchLoad():
     while player.buttonRight.pressing():
       wait(5,MSEC)
     catapult.stop()
+def hangfunc():
+  brazo.set_velocity(75,PERCENT)
+  while True:
+    if player.buttonLeft.pressing():
+      brazo.spin(FORWARD)
+    elif player.buttonUp.pressing():
+      brazo.spin(REVERSE)
+    else:
+      brazo.stop()
+
 # endregion
 # region --------auton funcs----------
 def move(dis=float(24)):
@@ -90,27 +104,32 @@ def turn(theta=90):
   wait(5,MSEC)
 def autonTime():
   setup(1)
-  catapult.spin_for(FORWARD,5*25,TURNS,wait=True)
-  catapult.spin_for(FORWARD,6,TURNS,wait=True)
-  rightside.set_velocity(75,PERCENT)
-  leftside.set_velocity(75,PERCENT)
-  move(-40)
-  
+  if auton == 'offen':
+    move(20)
+    turn(-120)
+    move(10)
+    catapult.spin(FORWARD)
+    wait(30000,MSEC)
+    catapult.stop()
+    windup()
+  move(-20)
+  turn(180)
+  move(20)
 
 # endregion 
 # region --------comp funcs-----------
-def startDrivers():
-  setup(1)
-  driverTime.broadcast()
+def startDriver():
+  driver.broadcast()
 def autoF():
   active = Thread(autonTime)
   while (comp.is_autonomous() and comp.is_enabled()):
     wait(10,MSEC)
   active.stop()
 def drivF():
-  active = Thread(startDrivers)
-  while (comp.is_driver_control() and comp.is_enabled()):
-    wait(10,MSEC)
+  setup(1)
+  active = Thread(startDriver)
+  while comp.is_driver_control() and comp.is_enabled():
+    wait(5,MSEC)
   active.stop()
 # endregion
 # region --------other funcs----------
@@ -119,16 +138,14 @@ def wings(exp=True):
   wings2.set(exp)
 def windup():
   catapult.spin(FORWARD)
-  while not catsens.pressing():
+  while (not catsens.pressing()):
     wait(5,MSEC)
-  catapult.stop()
   catapult.spin_for(FORWARD,1/8,TURNS,wait=True)
 def release():
   catapult.spin(FORWARD)
   while catsens.pressing():
     wait(5,MSEC)
-  wait(0.5,SECONDS)
-  catapult.spin_for(FORWARD,1,TURNS,wait=True)
+  catapult.stop()
 def detectAuton():
   autonSel.set_light(LedStateType.ON)
   autonSel.set_light_power(50)
@@ -158,34 +175,51 @@ def setup(value=0):
   catapult.set_velocity(100,PERCENT)
 def R1Manager():
   while True:
-    if player.buttonR1.pressing():
-      wings(True)
-      while player.buttonR1.pressing():
-        wait(10,MSEC)
-      wings(False)
-    wait(10,MSEC)
+    while not player.buttonR1.pressing():
+      wait(5,MSEC) 
+    wings(True)
+    while player.buttonR1.pressing():
+      wait(5,MSEC)
+    wings(False)
 def LWingManager():
   while True:
-    if player.buttonDown.pressing() and not player.buttonR1.pressing():
-      wings1.set(True)
-      while player.buttonDown.pressing():
-        wait(10,MSEC)
-      wings1.set(False)
+    while not (player.buttonDown.pressing() and not player.buttonR1.pressing()):
+      wait(5,MSEC)
+    wings1.set(True)
+    while player.buttonDown.pressing():
+      wait(5,MSEC)
+    wings1.set(False)
 def RWingManager():
   while True:
-    if player.buttonB.pressing() and not player.buttonR1.pressing():
-      wings2.set(True)
-      while player.buttonB.pressing():
-        wait(10,MSEC)
-      wings2.set(False)
+    while not (player.buttonB.pressing() and not player.buttonR1.pressing()):
+      wait(5,MSEC)
+    wings2.set(True)
+    while player.buttonB.pressing():
+      wait(5,MSEC)
+    wings2.set(False)
+def wedgeF():
+  wedge.set(False)
+  toggle = 0
+  while True:
+    while not (player.buttonY.pressing()):
+      wait(5,MSEC)
+    if toggle == 0:
+      wedge.set(True)
+      toggle = 1
+    elif toggle == 1:
+      wedge.set(False)
+      toggle = 0
+    while player.buttonY.pressing():
+      wait(5,MSEC)
 # endregion
-driverTime = Event()
+driver = Event()
 comp = Competition(drivF,autoF)
-driverTime(joystickfunc)
-driverTime(intakefunc)
-driverTime(wingManager)
-driverTime(laCATAPULTA)
-driverTime(matchLoad)
+driver(joystickfunc)
+driver(intakefunc)
+driver(laCATAPULTA)
+driver(matchLoad)
+driver(wingManager)
+driver(hangfunc)
 wait(15,MSEC)
 
 setup()

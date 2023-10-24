@@ -154,6 +154,7 @@ def autonTime():
     wait(100,MSEC)
     move(-25)
     turn(47)
+    windup()
     intake.spin_for(FORWARD,6,TURNS,wait=False)
     move(5)
     wait(100,MSEC)
