@@ -37,6 +37,9 @@ while gyro.is_calibrating():
   wait(15,MSEC)
 # endregion
 # region --------driver funcs---------
+def endgameAlert():
+  wait(65,SECONDS)
+  player.rumble('..-')
 def joystickfunc():
   leftside.spin(FORWARD)
   rightside.spin(FORWARD)
@@ -302,6 +305,7 @@ def wedgeF():
 # endregion
 driver = Event()
 comp = Competition(drivF,autoF)
+driver(endgameAlert)
 driver(joystickfunc)
 driver(intakefunc)
 driver(laCATAPULTA)
