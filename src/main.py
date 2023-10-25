@@ -83,6 +83,10 @@ def matchLoad():
     catapult.stop()
 def hangfunc():
   brazo.set_velocity(75,PERCENT)
+  brazo.spin(REVERSE)
+  wait(0.25,SECONDS)
+  brazo.stop()
+  windup()
   while True:
     if player.buttonLeft.pressing():
       brazo.spin(FORWARD)
@@ -98,6 +102,8 @@ def process(val):
   elif val < 0: return 360 - val
   else: return 0
 def move(dis=float(24)):
+  leftside.set_velocity(75,PERCENT)
+  rightside.set_velocity(75,PERCENT)
   factor=5.5
   leftside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
   rightside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
@@ -156,7 +162,7 @@ def autonTime():
     intake.spin_for(FORWARD,1.5,TURNS,wait=False)
     wait(100,MSEC)
     move(-4)
-    turn(160)
+    turn(150)
     move(8)
     intake.spin_for(REVERSE,2,TURNS,wait=True)
     move(13)
