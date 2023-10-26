@@ -231,7 +231,7 @@ def windup():
   catapult.spin(FORWARD)
   while (not catsens.pressing()):
     wait(5,MSEC)
-  catapult.spin_for(FORWARD,1/8,TURNS,wait=True)
+  catapult.spin_for(FORWARD,1/5,TURNS,wait=True)
 def release():
   catapult.spin(FORWARD)
   while catsens.pressing():
