@@ -38,7 +38,7 @@ while gyro.is_calibrating():
 # endregion
 # region --------driver funcs---------
 def endgameAlert():
-  wait(55,SECONDS)
+  wait(90,SECONDS)
   player.rumble('..-')
 def joystickfunc():
   leftside.spin(FORWARD)
