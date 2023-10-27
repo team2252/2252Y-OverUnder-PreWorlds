@@ -263,6 +263,7 @@ def setup(value=0):
   else: 
     intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
   wings(False)
+  catapult.set_stopping(COAST)
   catapult.set_velocity(100,PERCENT)
 def R1Manager():
   while True:
