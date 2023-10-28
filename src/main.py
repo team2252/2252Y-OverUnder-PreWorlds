@@ -195,6 +195,7 @@ def autonTime():
     turn(-40)
     brazo.spin_for(FORWARD,0.55,TURNS,wait=False)
     move(-8)
+    sturn(-30)
   elif auton == 'defen':
     move(3)
     brazo.spin_for(FORWARD,0.6,TURNS,wait=False)
