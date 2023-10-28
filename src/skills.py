@@ -28,10 +28,18 @@ catsens = Limit(brain.three_wire_port.c)
 autonSel = Optical(Ports.PORT9)
 brazo = Motor(Ports.PORT10,GearSetting.RATIO_18_1,False)
 wedge = DigitalOut(brain.three_wire_port.d)
+gyro = Inertial(Ports.PORT11)
 
 player=Controller()
+
+gyro.calibrate()
+while gyro.is_calibrating():
+  wait(15,MSEC)
 # endregion
 # region --------driver funcs---------
+def endgameAlert():
+  wait(80,SECONDS)
+  player.rumble('..-')
 def joystickfunc():
   leftside.spin(FORWARD)
   rightside.spin(FORWARD)
@@ -78,6 +86,10 @@ def matchLoad():
     catapult.stop()
 def hangfunc():
   brazo.set_velocity(75,PERCENT)
+  brazo.spin(REVERSE)
+  wait(0.25,SECONDS)
+  brazo.stop()
+  windup()
   while True:
     if player.buttonLeft.pressing():
       brazo.spin(FORWARD)
@@ -88,12 +100,19 @@ def hangfunc():
 
 # endregion
 # region --------auton funcs----------
+def process(val):
+  if val > 0: return val
+  elif val < 0: return 360 - val
+  else: return 0
 def move(dis=float(24)):
+  leftside.set_velocity(75,PERCENT)
+  rightside.set_velocity(75,PERCENT)
   factor=5.5
   leftside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
   rightside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
   wait(5,MSEC)
 def turn(theta=90):
+  gyro.set_heading(0)
   rightside.set_velocity(30,PERCENT)
   leftside.set_velocity(30,PERCENT)
   factor=48
@@ -102,20 +121,81 @@ def turn(theta=90):
   rightside.set_velocity(50,PERCENT)
   leftside.set_velocity(50,PERCENT)
   wait(5,MSEC)
+  if theta < 0: finetune(theta,'l')
+  elif theta > 0: finetune(theta,'r')
+def sturn(theta=90):
+  gyro.set_heading(0)
+  rightside.set_velocity(20,PERCENT)
+  leftside.set_velocity(20,PERCENT)
+  factor=48
+  leftside.spin_for(FORWARD,theta/factor,TURNS,wait=False)
+  rightside.spin_for(REVERSE,theta/factor,TURNS,wait=True)
+  rightside.set_velocity(40,PERCENT)
+  leftside.set_velocity(40,PERCENT)
+  wait(5,MSEC)
+  if theta < 0: finetune(theta,'l')
+  elif theta > 0: finetune(theta,'r')
+def finetune(val,dir):
+  val = process(val)
+  rightside.set_velocity(5,PERCENT)
+  leftside.set_velocity(5,PERCENT)
+  if (val + 2.5) < gyro.heading():
+    leftside.spin(REVERSE)
+    rightside.spin(FORWARD)
+  elif (val - 2.5) > gyro.heading():
+    leftside.spin(FORWARD)
+    rightside.spin(REVERSE)
+  while not (gyro.heading() < (val - 2.5) or gyro.heading() > (val + 2.5)):
+    wait(5,MSEC)
+  leftside.stop()
+  rightside.stop()
 def autonTime():
   setup(1)
   if auton == 'offen':
-    move(20)
-    turn(-120)
-    move(10)
+    rightside.set_velocity(75,PERCENT)
+    leftside.set_velocity(75,PERCENT)
+    move(3)
+    wait(500,MSEC)
     catapult.spin(FORWARD)
-    wait(30000,MSEC)
+    wait(40000,MSEC)
     catapult.stop()
-    windup()
-  move(-20)
-  turn(180)
-  move(20)
+    wait(200,MSEC)
+    move(-2)
+    turn(-90)
+    move(-29)
+    move(4)
+    turn(-80)
+    move(-7)
+    wait(10,MSEC)
+    move(20)
+    turn(-60)
+    move(40)
+    turn(50)
+    move(18)
+    wings(True)
+    move(50)
+    wings(False)
+    move(-20)
+    turn(-30)
+    wings(True)
+    move(20)
+    wings(False)
+    move(-5)
+    turn(30)
+    move(-10)
+    wings(True)
+    move(30)
 
+
+
+    
+
+  elif auton == 'defen':
+    move(1)
+    move()
+
+  else:
+    pass
 # endregion 
 # region --------comp funcs-----------
 def startDriver():
@@ -140,7 +220,7 @@ def windup():
   catapult.spin(FORWARD)
   while (not catsens.pressing()):
     wait(5,MSEC)
-  catapult.spin_for(FORWARD,1/8,TURNS,wait=True)
+  catapult.spin_for(FORWARD,1/5,TURNS,wait=True)
 def release():
   catapult.spin(FORWARD)
   while catsens.pressing():
@@ -172,6 +252,7 @@ def setup(value=0):
   else: 
     intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
   wings(False)
+  catapult.set_stopping(COAST)
   catapult.set_velocity(100,PERCENT)
 def R1Manager():
   while True:
@@ -214,6 +295,7 @@ def wedgeF():
 # endregion
 driver = Event()
 comp = Competition(drivF,autoF)
+driver(endgameAlert)
 driver(joystickfunc)
 driver(intakefunc)
 driver(laCATAPULTA)

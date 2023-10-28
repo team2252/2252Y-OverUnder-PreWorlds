@@ -38,7 +38,7 @@ while gyro.is_calibrating():
 # endregion
 # region --------driver funcs---------
 def endgameAlert():
-  wait(90,SECONDS)
+  wait(80,SECONDS)
   player.rumble('..-')
 def joystickfunc():
   leftside.spin(FORWARD)
@@ -107,6 +107,13 @@ def process(val):
 def move(dis=float(24)):
   leftside.set_velocity(75,PERCENT)
   rightside.set_velocity(75,PERCENT)
+  factor=5.5
+  leftside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
+  rightside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
+  wait(5,MSEC)
+def smove(dis=float(24)):
+  leftside.set_velocity(10,PERCENT)
+  rightside.set_velocity(10,PERCENT)
   factor=5.5
   leftside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
   rightside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
@@ -201,20 +208,23 @@ def autonTime():
     brazo.stop()
     turn(10)
     intake.spin_for(FORWARD,3,TURNS,wait=False)
-    move(4)
+    move(5)
     wait(10,MSEC)
-    move(-6)
+    move(-7)
     turn(-160)
     move(5)
     intake.spin_for(REVERSE,3,TURNS,wait=True)
     move(8)
     wait(10,MSEC)
     move(-10)
-    turn(-40)
+    turn(-50)
     wait(10,MSEC)
     move(-25)
-    turn(-20)
-    move(-24)
+    turn(-25)
+    move(-19)
+    wait(10,MSEC)
+    smove(-5)
+    
     
 
   else:
