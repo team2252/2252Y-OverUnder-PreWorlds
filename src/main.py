@@ -10,6 +10,8 @@
 # Library imports
 from vex import *
 auton = '' # selección de autonomo fisico :)
+trackwidth = 12.25
+rCirc = trackwidth * 3.14159
 
 # Brain should be defined by default
 brain=Brain()
@@ -97,7 +99,6 @@ def hangfunc():
       brazo.spin(REVERSE)
     else:
       brazo.stop()
-
 # endregion
 # region --------auton funcs----------
 def process(val):
@@ -122,27 +123,29 @@ def turn(theta=90):
   gyro.set_heading(0)
   rightside.set_velocity(30,PERCENT)
   leftside.set_velocity(30,PERCENT)
-  factor=48
-  leftside.spin_for(FORWARD,theta/factor,TURNS,wait=False)
-  rightside.spin_for(REVERSE,theta/factor,TURNS,wait=True)
-  rightside.set_velocity(50,PERCENT)
-  leftside.set_velocity(50,PERCENT)
+  turnAmount = ((theta/360)*rCirc/12.556)*7/3
   wait(5,MSEC)
-  if theta < 0: finetune(theta,'l')
-  elif theta > 0: finetune(theta,'r')
+  if theta < 0: finetune(theta)
+  elif theta > 0: finetune(theta)
+def pturn(theta=90):
+  rightside.set_velocity(30,PERCENT)
+  leftside.set_velocity(30,PERCENT)
+  turnAmount = ((abs(theta)/360)*rCirc*2/12.556)*7/3
+  if theta < 0: rightside.spin_for(FORWARD,turnAmount,TURNS)
+  else: leftside.spin_for(FORWARD,turnAmount,TURNS)
+  wait(5)
+  finetune(theta)
 def sturn(theta=90):
   gyro.set_heading(0)
   rightside.set_velocity(20,PERCENT)
   leftside.set_velocity(20,PERCENT)
-  factor=48
-  leftside.spin_for(FORWARD,theta/factor,TURNS,wait=False)
-  rightside.spin_for(REVERSE,theta/factor,TURNS,wait=True)
-  rightside.set_velocity(40,PERCENT)
-  leftside.set_velocity(40,PERCENT)
+  turnAmount = ((theta/360)*rCirc/12.556)*7/3
+  leftside.spin_for(FORWARD,turnAmount,TURNS,wait=False)
+  rightside.spin_for(REVERSE,turnAmount,TURNS,wait=True)
   wait(5,MSEC)
-  if theta < 0: finetune(theta,'l')
-  elif theta > 0: finetune(theta,'r')
-def finetune(val,dir):
+  if theta < 0: finetune(theta)
+  elif theta > 0: finetune(theta)
+def finetune(val):
   val = process(val)
   rightside.set_velocity(5,PERCENT)
   leftside.set_velocity(5,PERCENT)
@@ -254,7 +257,7 @@ def windup():
   catapult.spin(FORWARD)
   while (not catsens.pressing()):
     wait(5,MSEC)
-  catapult.spin_for(FORWARD,1/5,TURNS,wait=True)
+  catapult.spin_for(FORWARD,1/10,TURNS,wait=True)
 def release():
   catapult.spin(FORWARD)
   while catsens.pressing():
