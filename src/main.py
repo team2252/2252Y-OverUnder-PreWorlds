@@ -9,6 +9,7 @@
 # region ------------conf-------------
 # Library imports
 from vex import *
+
 auton = '' # selección de autonomo fisico :)
 trackwidth = 12.25
 rCirc = trackwidth * 3.14159
@@ -233,6 +234,8 @@ def autonTime():
     
     
 
+  else:
+    pass
   else:
     pass
 # endregion 
