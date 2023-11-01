@@ -12,7 +12,6 @@ from vex import *
 
 auton = '' # selección de autonomo fisico :)
 trackwidth = 12.25
-rCirc = trackwidth * 3.14159
 
 # Brain should be defined by default
 brain=Brain()
@@ -126,23 +125,37 @@ def turn(theta=90):
   gyro.set_heading(0)
   rightside.set_velocity(30,PERCENT)
   leftside.set_velocity(30,PERCENT)
-  turnAmount = ((theta/360)*rCirc/12.556)*7/3
+  turnAmount = calcRot(theta)
+  leftside.spin_for(FORWARD,turnAmount,TURNS,wait=False)
+  rightside.spin_for(REVERSE,turnAmount,TURNS,wait=True)
   wait(5,MSEC)
   if theta < 0: finetune(theta)
   elif theta > 0: finetune(theta)
 def pturn(theta=90):
-  rightside.set_velocity(30,PERCENT)
-  leftside.set_velocity(30,PERCENT)
-  turnAmount = ((abs(theta)/360)*rCirc*2/12.556)*7/3
-  if theta < 0: rightside.spin_for(FORWARD,turnAmount,TURNS)
-  else: leftside.spin_for(FORWARD,turnAmount,TURNS)
+  rightside.set_velocity(45,PERCENT)
+  leftside.set_velocity(45,PERCENT)
+  turnAmount = abs(calcRot(theta)*2)
+  if theta < 0: leftside.set_stopping(HOLD); rightside.spin_for(FORWARD,turnAmount,TURNS)
+  else: rightside.set_stopping(HOLD); leftside.spin_for(FORWARD,turnAmount,TURNS)
+  leftside.set_stopping(BRAKE)
+  rightside.set_stopping(BRAKE)
+  wait(5)
+  finetune(theta)
+def rpturn(theta=90):
+  rightside.set_velocity(45,PERCENT)
+  leftside.set_velocity(45,PERCENT)
+  turnAmount = -abs(calcRot(theta)*2)
+  if theta < 0: leftside.set_stopping(HOLD); rightside.spin_for(FORWARD,turnAmount,TURNS)
+  else: rightside.set_stopping(HOLD); leftside.spin_for(FORWARD,turnAmount,TURNS)
+  leftside.set_stopping(BRAKE)
+  rightside.set_stopping(BRAKE)
   wait(5)
   finetune(theta)
 def sturn(theta=90):
   gyro.set_heading(0)
   rightside.set_velocity(20,PERCENT)
   leftside.set_velocity(20,PERCENT)
-  turnAmount = ((theta/360)*rCirc/12.556)*7/3
+  turnAmount = calcRot(theta)
   leftside.spin_for(FORWARD,turnAmount,TURNS,wait=False)
   rightside.spin_for(REVERSE,turnAmount,TURNS,wait=True)
   wait(5,MSEC)
@@ -162,6 +175,11 @@ def finetune(val):
     wait(5,MSEC)
   leftside.stop()
   rightside.stop()
+def autonTest():
+  wait(1,SECONDS)
+  pturn(90)
+  wait(1,SECONDS)
+  pturn(-90)
 def autonTime():
   setup(1)
   if auton == 'offen':
@@ -231,11 +249,6 @@ def autonTime():
     move(-19)
     wait(10,MSEC)
     smove(-5)
-    
-    
-
-  else:
-    pass
   else:
     pass
 # endregion 
@@ -243,7 +256,7 @@ def autonTime():
 def startDriver():
   driver.broadcast()
 def autoF():
-  active = Thread(autonTime)
+  active = Thread(autonTest)
   while (comp.is_autonomous() and comp.is_enabled()):
     wait(10,MSEC)
   active.stop()
@@ -334,6 +347,11 @@ def wedgeF():
       toggle = 0
     while player.buttonY.pressing():
       wait(5,MSEC)
+def calcRot(val=float(0)):
+  rCirc = trackwidth * 3.14159
+  return ((val/360)*rCirc/12.556)*7/3
+def calcArc(val=float(0)):
+  return val/12.556*7/3
 # endregion
 driver = Event()
 comp = Competition(drivF,autoF)
