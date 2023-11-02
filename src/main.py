@@ -132,6 +132,7 @@ def turn(theta=90):
   if theta < 0: finetune(theta)
   elif theta > 0: finetune(theta)
 def pturn(theta=90):
+  gyro.set_heading(0)
   rightside.set_velocity(45,PERCENT)
   leftside.set_velocity(45,PERCENT)
   turnAmount = abs(calcRot(theta)*2)
@@ -142,11 +143,12 @@ def pturn(theta=90):
   wait(5)
   finetune(theta)
 def rpturn(theta=90):
+  gyro.set_heading(0)
   rightside.set_velocity(45,PERCENT)
   leftside.set_velocity(45,PERCENT)
   turnAmount = -abs(calcRot(theta)*2)
-  if theta < 0: leftside.set_stopping(HOLD); rightside.spin_for(FORWARD,turnAmount,TURNS)
-  else: rightside.set_stopping(HOLD); leftside.spin_for(FORWARD,turnAmount,TURNS)
+  if theta < 0: rightside.set_stopping(HOLD); leftside.spin_for(FORWARD,turnAmount,TURNS)
+  else: leftside.set_stopping(HOLD); rightside.spin_for(FORWARD,turnAmount,TURNS)
   leftside.set_stopping(BRAKE)
   rightside.set_stopping(BRAKE)
   wait(5)
@@ -165,13 +167,13 @@ def finetune(val):
   val = process(val)
   rightside.set_velocity(5,PERCENT)
   leftside.set_velocity(5,PERCENT)
-  if (val + 2.5) < gyro.heading():
+  if (val + 1) < gyro.heading():
     leftside.spin(REVERSE)
     rightside.spin(FORWARD)
-  elif (val - 2.5) > gyro.heading():
+  elif (val - 1) > gyro.heading():
     leftside.spin(FORWARD)
     rightside.spin(REVERSE)
-  while not (gyro.heading() < (val - 2.5) or gyro.heading() > (val + 2.5)):
+  while not (gyro.heading() < (val - 1) or gyro.heading() > (val + 1)):
     wait(5,MSEC)
   leftside.stop()
   rightside.stop()
@@ -180,6 +182,8 @@ def autonTest():
   pturn(90)
   wait(1,SECONDS)
   pturn(-90)
+  wait(1,SECONDS)
+  rpturn(90)
 def autonTime():
   setup(1)
   if auton == 'offen':
