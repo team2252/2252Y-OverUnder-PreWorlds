@@ -129,8 +129,7 @@ def turn(theta=90):
   leftside.spin_for(FORWARD,turnAmount,TURNS,wait=False)
   rightside.spin_for(REVERSE,turnAmount,TURNS,wait=True)
   wait(5,MSEC)
-  if theta < 0: finetune(theta)
-  elif theta > 0: finetune(theta)
+  finetune(theta)
 def pturn(theta=90):
   gyro.set_heading(0)
   rightside.set_velocity(45,PERCENT)
@@ -279,7 +278,7 @@ def windup():
   catapult.spin(FORWARD)
   while (not catsens.pressing()):
     wait(5,MSEC)
-  catapult.spin_for(FORWARD,1/10,TURNS,wait=True)
+  catapult.spin_for(FORWARD,1/6,TURNS,wait=True)
 def release():
   catapult.spin(FORWARD)
   while catsens.pressing():
