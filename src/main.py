@@ -108,8 +108,8 @@ def process(val):
   elif val < 0: return 360 - val
   else: return 0
 def move(dis=float(24)):
-  leftside.set_velocity(75,PERCENT)
-  rightside.set_velocity(75,PERCENT)
+  leftside.set_velocity(65,PERCENT)
+  rightside.set_velocity(65,PERCENT)
   factor=5.5
   leftside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
   rightside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
@@ -181,10 +181,11 @@ def autonTime():
   if auton == 'offen':
    rightside.set_velocity(75,PERCENT)
    leftside.set_velocity(75,PERCENT)
-   move(47)
+   move(48)
    turn(85)
-   intake.spin_for(REVERSE,1.5,TURNS,wait=False)
-   wait(100,MSEC)
+   move(-3)
+   intake.spin_for(REVERSE,1.5,TURNS,wait=True)
+   wait(70,MSEC)
    move(9.4)
    intake.stop() 
    move(-30)
