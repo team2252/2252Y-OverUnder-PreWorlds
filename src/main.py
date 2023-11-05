@@ -159,6 +159,37 @@ def sturn(theta=90):
   wait(5,MSEC)
   if theta < 0: finetune(theta)
   elif theta > 0: finetune(theta)
+def aturn(theta=90,pivdis=float(5)):
+  gyro.set_heading(0)
+  rightside.set_velocity(45,PERCENT)
+  leftside.set_velocity(45,PERCENT)
+  if theta < 0:
+    turnR = calcArc(theta,pivdis+trackwidth)
+    turnL = calcArc(theta,pivdis)
+    leftside.set_velocity(rightside.velocity(PERCENT) * (turnL/turnR),PERCENT)
+  else:
+    turnL = calcArc(theta,pivdis+trackwidth)
+    turnR = calcArc(theta,pivdis)
+    rightside.set_velocity(leftside.velocity(PERCENT) * (turnL/turnR),PERCENT)
+  rightside.spin_for(FORWARD,turnR,TURNS,wait=False)
+  leftside.spin_for(FORWARD,turnL,TURNS,wait=True)
+  wait(5,MSEC)
+def raturn(theta=90,pivdis=float(5)):
+  gyro.set_heading(0)
+  rightside.set_velocity(45,PERCENT)
+  leftside.set_velocity(45,PERCENT)
+  if theta > 0:
+    turnR = calcArc(theta,pivdis+trackwidth)
+    turnL = calcArc(theta,pivdis)
+    leftside.set_velocity(rightside.velocity(PERCENT) * (turnL/turnR),PERCENT)
+  else:
+    turnL = calcArc(theta,pivdis+trackwidth)
+    turnR = calcArc(theta,pivdis)
+    rightside.set_velocity(leftside.velocity(PERCENT) * (turnL/turnR),PERCENT)
+  rightside.spin_for(REVERSE,turnR,TURNS,wait=False)
+  leftside.spin_for(REVERSE,turnL,TURNS,wait=True)
+  wait(5,MSEC)
+
 def finetune(val):
   val = process(val)
   rightside.set_velocity(5,PERCENT)
@@ -340,9 +371,10 @@ def wedgeF():
     while player.buttonY.pressing():
       wait(5,MSEC)
 def calcRot(val=float(0)):
-  rCirc = trackwidth * 3.14159
+  rCirc = trackwidth * math.pi
   return ((val/360)*rCirc/12.556)*7/3
-def calcArc(val=float(0)):
+def calcArc(degs=0,dis=float(0)):
+  val = ((degs * math.pi) / 180) * dis
   return val/12.556*7/3
 # endregion
 driver = Event()
