@@ -90,9 +90,6 @@ def matchLoad():
     catapult.stop()
 def hangfunc():
   brazo.set_velocity(75,PERCENT)
-  brazo.spin(REVERSE)
-  wait(0.25,SECONDS)
-  brazo.stop()
   windup()
   while True:
     if player.buttonLeft.pressing():
