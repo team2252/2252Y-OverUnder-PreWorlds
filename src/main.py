@@ -90,7 +90,7 @@ def matchLoad():
     catapult.stop()
 def hangfunc():
   brazo.set_velocity(75,PERCENT)
-  windup()
+  # windup()
   while True:
     if player.buttonLeft.pressing():
       brazo.spin(FORWARD)
@@ -161,31 +161,33 @@ def sturn(theta=90):
   elif theta > 0: finetune(theta)
 def aturn(theta=90,pivdis=float(5)):
   gyro.set_heading(0)
-  rightside.set_velocity(45,PERCENT)
-  leftside.set_velocity(45,PERCENT)
+  vel = 55
+  rightside.set_velocity(vel,PERCENT)
+  leftside.set_velocity(vel,PERCENT)
   if theta < 0:
-    turnR = calcArc(theta,pivdis+trackwidth)
-    turnL = calcArc(theta,pivdis)
-    leftside.set_velocity(rightside.velocity(PERCENT) * (turnL/turnR),PERCENT)
+    turnR = abs(calcArc(theta,pivdis+trackwidth))
+    turnL = abs(calcArc(theta,pivdis))
+    leftside.set_velocity(vel * (turnL/turnR),PERCENT)
   else:
-    turnL = calcArc(theta,pivdis+trackwidth)
-    turnR = calcArc(theta,pivdis)
-    rightside.set_velocity(leftside.velocity(PERCENT) * (turnL/turnR),PERCENT)
+    turnL = abs(calcArc(theta,pivdis+trackwidth))
+    turnR = abs(calcArc(theta,pivdis))
+    rightside.set_velocity(vel * (turnR/turnL),PERCENT)
   rightside.spin_for(FORWARD,turnR,TURNS,wait=False)
   leftside.spin_for(FORWARD,turnL,TURNS,wait=True)
   wait(5,MSEC)
 def raturn(theta=90,pivdis=float(5)):
   gyro.set_heading(0)
-  rightside.set_velocity(45,PERCENT)
-  leftside.set_velocity(45,PERCENT)
+  vel = 55
+  rightside.set_velocity(vel,PERCENT)
+  leftside.set_velocity(vel,PERCENT)
   if theta > 0:
-    turnR = calcArc(theta,pivdis+trackwidth)
-    turnL = calcArc(theta,pivdis)
-    leftside.set_velocity(rightside.velocity(PERCENT) * (turnL/turnR),PERCENT)
+    turnR = abs(calcArc(theta,pivdis+trackwidth))
+    turnL = abs(calcArc(theta,pivdis))
+    leftside.set_velocity(vel * (turnL/turnR),PERCENT)
   else:
-    turnL = calcArc(theta,pivdis+trackwidth)
-    turnR = calcArc(theta,pivdis)
-    rightside.set_velocity(leftside.velocity(PERCENT) * (turnL/turnR),PERCENT)
+    turnL = abs(calcArc(theta,pivdis+trackwidth))
+    turnR = abs(calcArc(theta,pivdis))
+    rightside.set_velocity(vel * (turnR/turnL),PERCENT)
   rightside.spin_for(REVERSE,turnR,TURNS,wait=False)
   leftside.spin_for(REVERSE,turnL,TURNS,wait=True)
   wait(5,MSEC)
@@ -279,7 +281,7 @@ def autonTime():
 def startDriver():
   driver.broadcast()
 def autoF():
-  active = Thread(autonTime)
+  active = Thread(autonTest)
   while (comp.is_autonomous() and comp.is_enabled()):
     wait(10,MSEC)
   active.stop()
@@ -377,6 +379,8 @@ def calcArc(degs=0,dis=float(0)):
   val = ((degs * math.pi) / 180) * dis
   return val/12.556*7/3
 # endregion
+def autonTest():
+  aturn(-90,15)
 driver = Event()
 comp = Competition(drivF,autoF)
 driver(endgameAlert)
