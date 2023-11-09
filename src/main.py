@@ -20,8 +20,8 @@ frontleft = Motor(Ports.PORT1, GearSetting.RATIO_6_1, True)
 frontright = Motor(Ports.PORT2, GearSetting.RATIO_6_1, False)
 backleft = Motor(Ports.PORT3,GearSetting.RATIO_6_1,True)
 backright = Motor(Ports.PORT4,GearSetting.RATIO_6_1,False)
-rightside = MotorGroup(frontright,backright)
-leftside = MotorGroup(frontleft,backleft)
+Rside = MotorGroup(frontright,backright)
+Lside = MotorGroup(frontleft,backleft)
 intake = Motor(Ports.PORT5,GearSetting.RATIO_18_1,True)
 catapult1 = Motor(Ports.PORT6,GearSetting.RATIO_18_1,False)
 catapult2 = Motor(Ports.PORT7,GearSetting.RATIO_36_1,True)
@@ -45,11 +45,11 @@ def endgameAlert():
   wait(80,SECONDS)
   player.rumble('..-')
 def joystickfunc():
-  leftside.spin(FORWARD)
-  rightside.spin(FORWARD)
+  Lside.spin(FORWARD)
+  Rside.spin(FORWARD)
   while True:
-    leftside.set_velocity(player.axis3.position()+player.axis1.position(),PERCENT)
-    rightside.set_velocity(player.axis3.position()-player.axis1.position(),PERCENT)
+    Lside.set_velocity(player.axis3.position()+player.axis1.position(),PERCENT)
+    Rside.set_velocity(player.axis3.position()-player.axis1.position(),PERCENT)
     wait(5,MSEC)
 def intakefunc():
   intake.set_velocity(100,PERCENT)
@@ -90,7 +90,7 @@ def matchLoad():
     catapult.stop()
 def hangfunc():
   brazo.set_velocity(75,PERCENT)
-  # windup()
+  windup()
   while True:
     if player.buttonLeft.pressing():
       brazo.spin(FORWARD)
@@ -105,112 +105,129 @@ def process(val):
   elif val < 0: return 360 - val
   else: return 0
 def move(dis=float(24)):
-  leftside.set_velocity(65,PERCENT)
-  rightside.set_velocity(65,PERCENT)
+  vel = 75
+  Lside.set_velocity(vel,PERCENT)
+  Rside.set_velocity(vel,PERCENT)
   factor=5.5
-  leftside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
-  rightside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
+  tAmnt = dis/factor
+  Lside.spin_for(FORWARD,tAmnt,TURNS,wait=False)
+  Rside.spin_for(FORWARD,tAmnt,TURNS,wait=False)
+  slowdown([vel,tAmnt],[vel,tAmnt])
   wait(5,MSEC)
 def smove(dis=float(24)):
-  leftside.set_velocity(10,PERCENT)
-  rightside.set_velocity(10,PERCENT)
+  Lside.set_velocity(10,PERCENT)
+  Rside.set_velocity(10,PERCENT)
   factor=5.5
-  leftside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
-  rightside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
+  Lside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
+  Rside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
   wait(5,MSEC)
 def turn(theta=90):
   gyro.set_heading(0)
-  rightside.set_velocity(30,PERCENT)
-  leftside.set_velocity(30,PERCENT)
+  Rside.set_velocity(30,PERCENT)
+  Lside.set_velocity(30,PERCENT)
   turnAmount = calcRot(theta)
-  leftside.spin_for(FORWARD,turnAmount,TURNS,wait=False)
-  rightside.spin_for(REVERSE,turnAmount,TURNS,wait=True)
+  Lside.spin_for(FORWARD,turnAmount,TURNS,wait=False)
+  Rside.spin_for(REVERSE,turnAmount,TURNS,wait=True)
   wait(5,MSEC)
   finetune(theta)
 def pturn(theta=90):
   gyro.set_heading(0)
-  rightside.set_velocity(45,PERCENT)
-  leftside.set_velocity(45,PERCENT)
+  Rside.set_velocity(45,PERCENT)
+  Lside.set_velocity(45,PERCENT)
   turnAmount = abs(calcRot(theta)*2)
-  if theta < 0: leftside.set_stopping(HOLD); rightside.spin_for(FORWARD,turnAmount,TURNS)
-  else: rightside.set_stopping(HOLD); leftside.spin_for(FORWARD,turnAmount,TURNS)
-  leftside.set_stopping(BRAKE)
-  rightside.set_stopping(BRAKE)
+  if theta < 0: Lside.set_stopping(HOLD); Rside.spin_for(FORWARD,turnAmount,TURNS)
+  else: Rside.set_stopping(HOLD); Lside.spin_for(FORWARD,turnAmount,TURNS)
+  Lside.set_stopping(BRAKE)
+  Rside.set_stopping(BRAKE)
   wait(5)
   finetune(theta)
 def rpturn(theta=90):
   gyro.set_heading(0)
-  rightside.set_velocity(45,PERCENT)
-  leftside.set_velocity(45,PERCENT)
+  Rside.set_velocity(45,PERCENT)
+  Lside.set_velocity(45,PERCENT)
   turnAmount = -abs(calcRot(theta)*2)
-  if theta < 0: rightside.set_stopping(HOLD); leftside.spin_for(FORWARD,turnAmount,TURNS)
-  else: leftside.set_stopping(HOLD); rightside.spin_for(FORWARD,turnAmount,TURNS)
-  leftside.set_stopping(BRAKE)
-  rightside.set_stopping(BRAKE)
+  if theta < 0: Rside.set_stopping(HOLD); Lside.spin_for(FORWARD,turnAmount,TURNS)
+  else: Lside.set_stopping(HOLD); Rside.spin_for(FORWARD,turnAmount,TURNS)
+  Lside.set_stopping(BRAKE)
+  Rside.set_stopping(BRAKE)
   wait(5)
   finetune(theta)
 def sturn(theta=90):
   gyro.set_heading(0)
-  rightside.set_velocity(20,PERCENT)
-  leftside.set_velocity(20,PERCENT)
+  Rside.set_velocity(20,PERCENT)
+  Lside.set_velocity(20,PERCENT)
   turnAmount = calcRot(theta)
-  leftside.spin_for(FORWARD,turnAmount,TURNS,wait=False)
-  rightside.spin_for(REVERSE,turnAmount,TURNS,wait=True)
+  Lside.spin_for(FORWARD,turnAmount,TURNS,wait=False)
+  Rside.spin_for(REVERSE,turnAmount,TURNS,wait=True)
   wait(5,MSEC)
   if theta < 0: finetune(theta)
   elif theta > 0: finetune(theta)
 def aturn(theta=90,pivdis=float(5)):
   gyro.set_heading(0)
   vel = 55
-  rightside.set_velocity(vel,PERCENT)
-  leftside.set_velocity(vel,PERCENT)
+  Rside.set_velocity(vel,PERCENT)
+  Lside.set_velocity(vel,PERCENT)
   if theta < 0:
     turnR = abs(calcArc(theta,pivdis+trackwidth))
     turnL = abs(calcArc(theta,pivdis))
-    leftside.set_velocity(vel * (turnL/turnR),PERCENT)
+    veL = vel * (turnL/turnR)
+    veR = vel
   else:
     turnL = abs(calcArc(theta,pivdis+trackwidth))
     turnR = abs(calcArc(theta,pivdis))
-    rightside.set_velocity(vel * (turnR/turnL),PERCENT)
-  rightside.spin_for(FORWARD,turnR,TURNS,wait=False)
-  leftside.spin_for(FORWARD,turnL,TURNS,wait=True)
+    veL = vel
+    veR = vel * (turnR/turnL)
+  Rside.spin_for(FORWARD,turnR,TURNS,veR,PERCENT,False)
+  Lside.spin_for(FORWARD,turnL,TURNS,veL,PERCENT,False)
+  slowdown([veL,turnL],[veR,turnR])
   wait(5,MSEC)
 def raturn(theta=90,pivdis=float(5)):
   gyro.set_heading(0)
   vel = 55
-  rightside.set_velocity(vel,PERCENT)
-  leftside.set_velocity(vel,PERCENT)
+  Rside.set_velocity(vel,PERCENT)
+  Lside.set_velocity(vel,PERCENT)
   if theta > 0:
     turnR = abs(calcArc(theta,pivdis+trackwidth))
     turnL = abs(calcArc(theta,pivdis))
-    leftside.set_velocity(vel * (turnL/turnR),PERCENT)
+    veL = vel * (turnL/turnR)
+    veR = vel
   else:
     turnL = abs(calcArc(theta,pivdis+trackwidth))
     turnR = abs(calcArc(theta,pivdis))
-    rightside.set_velocity(vel * (turnR/turnL),PERCENT)
-  rightside.spin_for(REVERSE,turnR,TURNS,wait=False)
-  leftside.spin_for(REVERSE,turnL,TURNS,wait=True)
+    veL = vel
+    veR = vel * (turnR/turnL)
+  Rside.spin_for(REVERSE,turnR,TURNS,veR,PERCENT,False)
+  Lside.spin_for(REVERSE,turnL,TURNS,veL,PERCENT,False)
+  slowdown([veL,turnL],[veR,turnR])
   wait(5,MSEC)
+def slowdown(lefty=[],right=[]):
+  maxRPM = ((lefty[0]/100)*600,(right[0]/100)*600)
+  durat = (lefty[1]/maxRPM[0]*60,right[1]/maxRPM[1]*60)
+  wait(durat[0]/2,SECONDS)
+  Lside.set_velocity(lefty[0]*0.6,PERCENT)
+  Rside.set_velocity(right[0]*0.6,PERCENT)
+  while Lside.is_spinning() and Rside.is_spinning():
+    wait(5,MSEC)
 
 def finetune(val):
   val = process(val)
-  rightside.set_velocity(5,PERCENT)
-  leftside.set_velocity(5,PERCENT)
+  Rside.set_velocity(5,PERCENT)
+  Lside.set_velocity(5,PERCENT)
   if (val + 1) < gyro.heading():
-    leftside.spin(REVERSE)
-    rightside.spin(FORWARD)
+    Lside.spin(REVERSE)
+    Rside.spin(FORWARD)
   elif (val - 1) > gyro.heading():
-    leftside.spin(FORWARD)
-    rightside.spin(REVERSE)
+    Lside.spin(FORWARD)
+    Rside.spin(REVERSE)
   while not (gyro.heading() < (val - 1) or gyro.heading() > (val + 1)):
     wait(5,MSEC)
-  leftside.stop()
-  rightside.stop()
+  Lside.stop()
+  Rside.stop()
 def autonTime():
   setup(1)
   if auton == 'offen':
-   rightside.set_velocity(75,PERCENT)
-   leftside.set_velocity(75,PERCENT)
+   Rside.set_velocity(75,PERCENT)
+   Lside.set_velocity(75,PERCENT)
    move(48)
    turn(85)
    move(-3)
@@ -220,16 +237,16 @@ def autonTime():
    intake.stop() 
    move(-30)
    wings1.set(True)
-   rightside.set_velocity(75,PERCENT)
-   leftside.set_velocity(75,PERCENT)
+   Rside.set_velocity(75,PERCENT)
+   Lside.set_velocity(75,PERCENT)
    wait(200,MSEC)
    move(29)
    wait(10,MSEC)
    wings1.set(False)
    intake.spin_for(FORWARD,0.5,TURNS,wait=False)
    move(-4.5)
-   rightside.set_velocity(50,PERCENT)
-   leftside.set_velocity(50,PERCENT)
+   Rside.set_velocity(50,PERCENT)
+   Lside.set_velocity(50,PERCENT)
    turn(-150)
    move(20)
    intake.spin_for(FORWARD,1.5,TURNS,wait=False)
@@ -251,8 +268,8 @@ def autonTime():
     wait(1000,MSEC)
     move(3)
     sturn(160)
-    rightside.set_velocity(75,PERCENT)
-    leftside.set_velocity(75,PERCENT)
+    Rside.set_velocity(75,PERCENT)
+    Lside.set_velocity(75,PERCENT)
     brazo.stop()
     brazo.spin_for(REVERSE,0.5,TURNS,wait=True)
     brazo.stop()
@@ -281,7 +298,7 @@ def autonTime():
 def startDriver():
   driver.broadcast()
 def autoF():
-  active = Thread(autonTest)
+  active = Thread(autonTime)
   while (comp.is_autonomous() and comp.is_enabled()):
     wait(10,MSEC)
   active.stop()
@@ -300,7 +317,7 @@ def windup():
   catapult.spin(FORWARD)
   while (not catsens.pressing()):
     wait(5,MSEC)
-  catapult.spin_for(FORWARD,1/6,TURNS,wait=True)
+  catapult.spin_for(FORWARD,1/7,TURNS,wait=True)
 def release():
   catapult.spin(FORWARD)
   while catsens.pressing():
@@ -326,8 +343,8 @@ def detectAuton():
 def setup(value=0):
   if value == 1:
     global auton
-    rightside.set_velocity(50,PERCENT)
-    leftside.set_velocity(50,PERCENT)
+    Rside.set_velocity(50,PERCENT)
+    Lside.set_velocity(50,PERCENT)
     auton = detectAuton()
   else: 
     intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
