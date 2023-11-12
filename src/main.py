@@ -296,11 +296,11 @@ def autonTime():
     turn(160)
     wait(10,MSEC)
     move(-10)
-    move(25)
+    move(27)
     turn(-50)
-    move(20)
     turn(180)
     move(-20)
+    move(-10)
     smove(-8)
    
   else:
