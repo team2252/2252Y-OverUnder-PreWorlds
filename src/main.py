@@ -62,14 +62,20 @@ def intakefunc():
       intake.stop()
 def laCATAPULTA():
   while True:
-    while not player.buttonR2.pressing():
+    while not (player.buttonR2.pressing() or player.buttonX.pressing()):
       wait(5,MSEC)
-    if catsens.pressing():
+    if catsens.pressing() and player.buttonR2.pressing():
       release()
       wait(15,MSEC)
       windup()
-    else:
+    elif player.buttonR2.pressing():
       windup()
+    elif player.buttonX.pressing():
+      catapult.stop()
+      catapult.spin(REVERSE)
+      while player.buttonX.pressing():
+        wait(5)
+      catapult.stop()
     while player.buttonR2.pressing():
       wait(5,MSEC)
 def wingManager():
@@ -226,13 +232,17 @@ def finetune(val):
 def autonTime():
   setup(1)
   if auton == 'offen':
+   Rside.set_velocity(100,PERCENT)
+   Lside.set_velocity(100,PERCENT)
+   move(51)
+   turn(95)
    Rside.set_velocity(75,PERCENT)
    Lside.set_velocity(75,PERCENT)
-   move(48)
-   turn(90)
    move(-3)
    intake.spin_for(REVERSE,1.5,TURNS,wait=True)
    wait(70,MSEC)
+   Rside.set_velocity(100,PERCENT)
+   Lside.set_velocity(100,PERCENT)
    move(9.4)
    intake.stop() 
    move(-30)
@@ -240,17 +250,20 @@ def autonTime():
    Rside.set_velocity(75,PERCENT)
    Lside.set_velocity(75,PERCENT)
    wait(100,MSEC)
-   move(29)
+   move(30)
    wait(10,MSEC)
    wings1.set(False)
-   intake.spin_for(FORWARD,0.5,TURNS,wait=False)
    move(-4.5)
    Rside.set_velocity(50,PERCENT)
    Lside.set_velocity(50,PERCENT)
    turn(-155)
+   Rside.set_velocity(100,PERCENT)
+   Lside.set_velocity(100,PERCENT)
    move(20)
    intake.spin_for(FORWARD,1.5,TURNS,wait=False)
    wait(100,MSEC)
+   Rside.set_velocity(75,PERCENT)
+   Lside.set_velocity(75,PERCENT)
    move(-4)
    turn(150)
    move(8)
@@ -258,18 +271,21 @@ def autonTime():
    intake.stop()
    move(-19)
    move(5)
-   turn(120)
+   turn(125)
    intake.spin_for(FORWARD,3,TURNS,wait=False)
-   move(20)
+   move(18)
    wait(100,MSEC)
-   move(-13)
-   turn(-120)
+   Rside.set_velocity(100,PERCENT)
+   Lside.set_velocity(100,PERCENT)
+   move(-20)
+   pturn(-100)
    intake.spin_for(REVERSE,3,TURNS,wait=False)
    wings1.set(True)
    wait(200,MSEC)
    Rside.set_velocity(100,PERCENT)
    Lside.set_velocity(100,PERCENT)
-   move(20)
+   move(24)
+   wings1.set(False)
    
    
 
