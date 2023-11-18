@@ -111,7 +111,7 @@ def process(val):
   elif val < 0: return 360 - val
   else: return 0
 def move(dis=float(24)):
-  vel = 75
+  vel = 80
   Lside.set_velocity(vel,PERCENT)
   Rside.set_velocity(vel,PERCENT)
   factor=5.5
@@ -127,10 +127,17 @@ def smove(dis=float(24)):
   Lside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
   Rside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
   wait(5,MSEC)
+def nmove(dis=float(24)):
+  Lside.set_velocity(20,PERCENT)
+  Rside.set_velocity(20,PERCENT)
+  factor=5.5
+  Lside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
+  Rside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
+  wait(5,MSEC)
 def turn(theta=90):
   gyro.set_heading(0)
-  Rside.set_velocity(30,PERCENT)
-  Lside.set_velocity(30,PERCENT)
+  Rside.set_velocity(37,PERCENT)
+  Lside.set_velocity(37,PERCENT)
   turnAmount = calcRot(theta)
   Lside.spin_for(FORWARD,turnAmount,TURNS,wait=False)
   Rside.spin_for(REVERSE,turnAmount,TURNS,wait=True)
@@ -265,26 +272,28 @@ def autonTime():
    Rside.set_velocity(75,PERCENT)
    Lside.set_velocity(75,PERCENT)
    move(-4)
-   turn(150)
+   turn(160)
    move(8)
    intake.spin_for(REVERSE,3,TURNS,wait=True)
    intake.stop()
-   move(-19)
+   move(-18)
    move(5)
    turn(125)
-   intake.spin_for(FORWARD,3,TURNS,wait=False)
+   intake.spin_for(FORWARD,2.5,TURNS,wait=False)
    move(18)
    wait(100,MSEC)
    Rside.set_velocity(100,PERCENT)
    Lside.set_velocity(100,PERCENT)
-   move(-20)
-   pturn(-110)
-   intake.spin_for(REVERSE,3,TURNS,wait=False)
+   move(-16)
+   turn(-120)
+   intake.spin_for(REVERSE,2,TURNS,wait=True)
+   intake.spin_for(REVERSE,1.5,TURNS,wait=False)
    wings1.set(True)
    wait(200,MSEC)
    Rside.set_velocity(100,PERCENT)
    Lside.set_velocity(100,PERCENT)
-   move(24)
+   move(26)
+   move(-10)
    wings1.set(False)
    
    
@@ -294,32 +303,25 @@ def autonTime():
     move(3)
     brazo.spin_for(FORWARD,0.6,TURNS,wait=False)
     wait(1000,MSEC)
-    move(5)
-    sturn(160)
-    windup()
+    move(4)
+    turn(60)
     Rside.set_velocity(75,PERCENT)
     Lside.set_velocity(75,PERCENT)
     brazo.stop()
-    catapult.spin_for(FORWARD,0.4,TURNS,wait=False)
     brazo.spin_for(REVERSE,0.5,TURNS,wait=True)
     brazo.stop()
-    turn(15)
-    intake.spin_for(FORWARD,3,TURNS,wait=False)
-    move(6)
-    wait(10,MSEC)
-    move(-7)
-    turn(-160)
-    move(5)
-    intake.spin_for(REVERSE,3,TURNS,wait=True)
-    turn(160)
-    wait(10,MSEC)
-    move(-10)
-    move(27)
-    turn(-50)
-    turn(180)
+    turn(-70)
+    windup()
+    wait(200,MSEC)
     move(-20)
-    move(-10)
-    smove(-8)
+    turn(-30)
+    catapult.spin_for(FORWARD,0.4,TURNS,wait=False)
+    move(-24)
+    smove(-2)
+
+
+
+
    
   else:
     pass
