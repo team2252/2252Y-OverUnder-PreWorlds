@@ -156,7 +156,9 @@ def autonTime():
     leftside.set_velocity(75,PERCENT)
     move(3)
     wait(500,MSEC)
-    
+    catapult.spin(FORWARD)
+    wait(40,SECONDS)
+    catapult.stop()
     wait(200,MSEC)
     move(-2)
     turn(-95)
