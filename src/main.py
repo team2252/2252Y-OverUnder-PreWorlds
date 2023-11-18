@@ -71,7 +71,6 @@ def laCATAPULTA():
     elif player.buttonR2.pressing():
       windup()
     elif player.buttonX.pressing():
-      catapult.stop()
       catapult.spin(REVERSE)
       while player.buttonX.pressing():
         wait(5)
@@ -349,7 +348,16 @@ def windup():
   catapult.spin(FORWARD)
   while (not catsens.pressing()):
     wait(5,MSEC)
-  catapult.spin_for(FORWARD,1/7,TURNS,wait=True)
+  if catapult.efficiency() > 25:
+    catapult.spin_for(FORWARD,1/7,TURNS,wait=False)
+    while catapult.spin(FORWARD) is False:
+      wait(5)
+    catapult.stop()
+  else: 
+    catapult.spin(REVERSE)
+    while catsens.pressing():
+      wait(5,MSEC)
+    catapult.stop()
 def release():
   catapult.spin(FORWARD)
   while catsens.pressing():
@@ -381,7 +389,8 @@ def setup(value=0):
   else: 
     intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
   wings(False)
-  catapult.set_stopping(COAST)
+  catapult.set_stopping(HOLD)
+  catapult.set_timeout(1,SECONDS)
   catapult.set_velocity(100,PERCENT)
 def R1Manager():
   while True:
