@@ -62,21 +62,16 @@ def intakefunc():
       intake.stop()
 def laCATAPULTA():
   while True:
-    while not (player.buttonR2.pressing() or player.buttonX.pressing()):
-      wait(5,MSEC)
+    while not (player.buttonR2.pressing()):
+      unwind()
     if catsens.pressing() and player.buttonR2.pressing():
       release()
       wait(15,MSEC)
       windup()
     elif player.buttonR2.pressing():
       windup()
-    elif player.buttonX.pressing():
-      catapult.spin(REVERSE)
-      while player.buttonX.pressing():
-        wait(5)
-      catapult.stop()
     while player.buttonR2.pressing():
-      wait(5,MSEC)
+      unwind()
 def wingManager():
   wingActivator = Event()
   wingActivator(R1Manager)
@@ -347,21 +342,21 @@ def wings(exp=True):
 def windup():
   catapult.spin(FORWARD)
   while (not catsens.pressing()):
-    wait(5,MSEC)
-  if catapult.efficiency() > 25:
-    catapult.spin_for(FORWARD,1/7,TURNS,wait=False)
-    while catapult.spin(FORWARD) is False:
+    unwind()
+  catapult.spin_for(FORWARD,1/7,TURNS,wait=False)
+  while catapult.is_spinning():
+    unwind()
+def unwind():
+  if player.buttonX.pressing():
+    catapult.spin(REVERSE)
+    while player.buttonX.pressing():
       wait(5)
     catapult.stop()
-  else: 
-    catapult.spin(REVERSE)
-    while catsens.pressing():
-      wait(5,MSEC)
-    catapult.stop()
+  wait(5)
 def release():
   catapult.spin(FORWARD)
   while catsens.pressing():
-    wait(5,MSEC)
+    unwind()
   catapult.stop()
 def detectAuton():
   autonSel.set_light(LedStateType.ON)
@@ -390,7 +385,6 @@ def setup(value=0):
     intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
   wings(False)
   catapult.set_stopping(HOLD)
-  catapult.set_timeout(1,SECONDS)
   catapult.set_velocity(100,PERCENT)
 def R1Manager():
   while True:
