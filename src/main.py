@@ -31,7 +31,7 @@ wings2 = DigitalOut(brain.three_wire_port.b)
 catsens = Limit(brain.three_wire_port.c)
 autonSel = Optical(Ports.PORT9)
 brazo = Motor(Ports.PORT10,GearSetting.RATIO_18_1,False)
-wedge = DigitalOut(brain.three_wire_port.d)
+untip = DigitalOut(brain.three_wire_port.d)
 gyro = Inertial(Ports.PORT11)
 
 player=Controller()
@@ -77,7 +77,7 @@ def wingManager():
   wingActivator(R1Manager)
   wingActivator(LWingManager)
   wingActivator(RWingManager)
-  wingActivator(wedgeF)
+  wingActivator(untipF)
   wait(15,MSEC)
   wingActivator.broadcast()
 def matchLoad():
@@ -410,20 +410,15 @@ def RWingManager():
     while player.buttonB.pressing():
       wait(5,MSEC)
     wings2.set(False)
-def wedgeF():
-  wedge.set(False)
-  toggle = 0
+def untipF():
+  untip.set(False)
   while True:
     while not (player.buttonY.pressing()):
       wait(5,MSEC)
-    if toggle == 0:
-      wedge.set(True)
-      toggle = 1
-    elif toggle == 1:
-      wedge.set(False)
-      toggle = 0
+    untip.set(True)
     while player.buttonY.pressing():
       wait(5,MSEC)
+    untip.set(False)
 def calcRot(val=float(0)):
   rCirc = trackwidth * math.pi
   return ((val/360)*rCirc/12.556)*7/3
