@@ -33,6 +33,7 @@ autonSel = Optical(Ports.PORT9)
 brazo = Motor(Ports.PORT10,GearSetting.RATIO_18_1,False)
 untip = DigitalOut(brain.three_wire_port.d)
 gyro = Inertial(Ports.PORT11)
+Blocker = DigitalOut(brain.three_wire_port.e)
 
 player=Controller()
 
@@ -90,6 +91,20 @@ def matchLoad():
     while player.buttonRight.pressing():
       wait(5,MSEC)
     catapult.stop()
+def Block():
+ while True:
+    while not player.buttonY.pressing():
+      wait(5,MSEC) 
+    Blocker.set(True)
+    while player.buttonY.pressing():
+      wait(5,MSEC)
+    while not player.buttonY.pressing():
+      wait(5,MSEC) 
+    Blocker.set(False)
+    while player.buttonY.pressing():
+      wait(5,MSEC)
+  
+  
 def hangfunc():
   brazo.set_velocity(100,PERCENT)
   windup()
@@ -235,12 +250,12 @@ def finetune(val):
 def autonTime():
   setup(1)
   if auton == 'offen':
-   brazo.set_velocity(100,PERCENT)
-   brazo.spin_for(REVERSE,2,TURNS,wait=False)
+   Blocker.set(True)
    wings2.set(True)
    wait(200,MSEC)
    wings2.set(False)
    wait(200,MSEC)
+   Blocker.set(False)
    move(20)
    sturn(-35)
    intake.spin_for(FORWARD,5,TURNS,wait=False)
@@ -262,13 +277,16 @@ def autonTime():
    turn(-130)
    wait(100,MSEC)
    move(15)
-   intake.spin_for(REVERSE,3,TURNS,wait=True)
+   intake.spin_for(REVERSE,2,TURNS,wait=True)
    move(9)
    wait(100,MSEC)
    move(-32)
    wait(100,MSEC)
    move(2)
    turn(50)
+   move(52)
+   turn(90)
+  
    
    
 
@@ -279,12 +297,10 @@ def autonTime():
 
 
   elif auton == 'defen':
-    brazo.set_velocity(100,PERCENT)
+    Blocker.set(True)
     wings2.set(True)
-    wait(300,MSEC)
+    wait(200,MSEC)
     wings2.set(False)
-    brazo.spin_for(REVERSE,2,TURNS,wait=True)
-    brazo.spin_for(REVERSE,3,TURNS,wait=False)
     move(7)
     turn(-60)
     move(10)
@@ -299,6 +315,8 @@ def autonTime():
     turn(-20)
     catapult.spin_for(FORWARD,0.5,TURNS,wait=False)
     move(-17)
+
+
     
 
     
@@ -403,10 +421,10 @@ def RWingManager():
 def untipF():
   untip.set(False)
   while True:
-    while not (player.buttonY.pressing()):
+    while not (player.buttonUp.pressing()):
       wait(5,MSEC)
     untip.set(True)
-    while player.buttonY.pressing():
+    while player.buttonUp.pressing():
       wait(5,MSEC)
     untip.set(False)
 def calcRot(val=float(0)):
@@ -427,6 +445,7 @@ driver(laCATAPULTA)
 driver(matchLoad)
 driver(wingManager)
 driver(hangfunc)
+driver(Block)
 wait(15,MSEC)
 
 setup()
