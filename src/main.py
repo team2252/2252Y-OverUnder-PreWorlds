@@ -30,7 +30,6 @@ wings1 = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
 catsens = Limit(brain.three_wire_port.c)
 autonSel = Optical(Ports.PORT9)
-brazo = Motor(Ports.PORT10,GearSetting.RATIO_18_1,False)
 untip = DigitalOut(brain.three_wire_port.d)
 gyro = Inertial(Ports.PORT11)
 Blocker = DigitalOut(brain.three_wire_port.e)
@@ -83,38 +82,20 @@ def wingManager():
   wingActivator(untipF)
   wait(15,MSEC)
   wingActivator.broadcast()
-def matchLoad():
-  while True:
-    while not player.buttonRight.pressing():
-      wait(5,MSEC)
-    catapult.spin(FORWARD)
-    while player.buttonRight.pressing():
-      wait(5,MSEC)
-    catapult.stop()
 def Block():
  while True:
     while not player.buttonY.pressing():
       wait(5,MSEC) 
     Blocker.set(True)
+    release()
     while player.buttonY.pressing():
       wait(5,MSEC)
     while not player.buttonY.pressing():
       wait(5,MSEC) 
     Blocker.set(False)
+    windup()
     while player.buttonY.pressing():
       wait(5,MSEC)
-  
-  
-def hangfunc():
-  brazo.set_velocity(100,PERCENT)
-  windup()
-  while True:
-    if player.buttonLeft.pressing():
-      brazo.spin(FORWARD)
-    elif player.buttonUp.pressing():
-      brazo.spin(REVERSE)
-    else:
-      brazo.stop()
 # endregion
 # region --------auton funcs----------
 def process(val):
@@ -254,8 +235,7 @@ def autonTime():
    wings2.set(True)
    wait(200,MSEC)
    wings2.set(False)
-   wait(200,MSEC)
-   Blocker.set(False)
+   wait(100,MSEC)
    move(20)
    sturn(-35)
    intake.spin_for(FORWARD,5,TURNS,wait=False)
@@ -269,23 +249,26 @@ def autonTime():
    wait(100,MSEC)
    wings1.set(False)
    move(-20)
-   turn(130)
+   turn(135)
    intake.spin_for(FORWARD,3.5,TURNS,wait=False)
    move(10)
    wait(100,MSEC)
    move(-7)
    turn(-130)
    wait(100,MSEC)
-   move(15)
+   move(14)
    intake.spin_for(REVERSE,2,TURNS,wait=True)
    move(9)
    wait(100,MSEC)
+   Blocker.set(False)
    move(-32)
    wait(100,MSEC)
    move(2)
    turn(50)
-   move(52)
-   turn(90)
+   move(56)
+   turn(70)
+   move(-27)
+   move(10)
   
    
    
@@ -315,6 +298,8 @@ def autonTime():
     turn(-20)
     catapult.spin_for(FORWARD,0.5,TURNS,wait=False)
     move(-17)
+    wait(1,SECONDS)
+    Blocker.set(False)
 
 
     
@@ -442,9 +427,7 @@ driver(endgameAlert)
 driver(joystickfunc)
 driver(intakefunc)
 driver(laCATAPULTA)
-driver(matchLoad)
 driver(wingManager)
-driver(hangfunc)
 driver(Block)
 wait(15,MSEC)
 
