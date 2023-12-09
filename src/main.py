@@ -64,15 +64,17 @@ def intakefunc():
       intake.stop()
 def laCATAPULTA():
   while True:
-    while not (player.buttonR2.pressing()):
+    global catActiv
+    catActiv = True
+    while (not player.buttonR2.pressing()) and catActiv:
       unwind()
-    if catsens.pressing() and player.buttonR2.pressing():
+    if catsens.pressing() and player.buttonR2.pressing() and catActiv:
       release()
       wait(15,MSEC)
       windup()
-    elif player.buttonR2.pressing():
+    elif player.buttonR2.pressing() and catActiv:
       windup()
-    while player.buttonR2.pressing():
+    while player.buttonR2.pressing() and catActiv:
       unwind()
 def wingManager():
   wingActivator = Event()
@@ -87,13 +89,13 @@ def Block():
     while not player.buttonY.pressing():
       wait(5,MSEC) 
     Blocker.set(True)
-    release()
+    if catsens.pressing(): release()
     while player.buttonY.pressing():
       wait(5,MSEC)
     while not player.buttonY.pressing():
       wait(5,MSEC) 
     Blocker.set(False)
-    windup()
+    if not catsens.pressing(): windup()
     while player.buttonY.pressing():
       wait(5,MSEC)
 # endregion
@@ -269,24 +271,14 @@ def autonTime():
    turn(70)
    move(-27)
    move(10)
-  
-   
-   
-
-   
-
-
-   
-
-
   elif auton == 'defen':
     Blocker.set(True)
     wings2.set(True)
     wait(200,MSEC)
     wings2.set(False)
-    move(7)
+    move(6)
     turn(-60)
-    move(10)
+    move(11)
     wings1.set(True)
     wait(300,MSEC)
     turn(-30)
@@ -300,16 +292,6 @@ def autonTime():
     move(-17)
     wait(1,SECONDS)
     Blocker.set(False)
-
-
-    
-
-    
-
-
-
-
-   
   else:
     pass
 # endregion 
@@ -340,6 +322,7 @@ def windup():
   while catapult.is_spinning():
     unwind()
 def unwind():
+  catActiv = False
   if player.buttonX.pressing():
     catapult.spin(REVERSE)
     while player.buttonX.pressing():
