@@ -76,14 +76,14 @@ def laCATAPULTA():
       windup()
     while player.buttonR2.pressing() and catActiv:
       unwind()
-def wingManager():
-  wingActivator = Event()
-  wingActivator(R1Manager)
-  wingActivator(LWingManager)
-  wingActivator(RWingManager)
-  wingActivator(untipF)
+def pneumaticManager():
+  activator = Event()
+  activator(R1Manager)
+  activator(LWingManager)
+  activator(RWingManager)
+  activator(untipF)
   wait(15,MSEC)
-  wingActivator.broadcast()
+  activator.broadcast()
 def Block():
  while True:
     while not player.buttonY.pressing():
@@ -215,7 +215,6 @@ def slowdown(lefty=[],right=[]):
   Rside.set_velocity(right[0]*0.6,PERCENT)
   while Lside.is_spinning() and Rside.is_spinning():
     wait(5,MSEC)
-
 def finetune(val):
   val = process(val)
   Rside.set_velocity(5,PERCENT)
@@ -410,7 +409,7 @@ driver(endgameAlert)
 driver(joystickfunc)
 driver(intakefunc)
 driver(laCATAPULTA)
-driver(wingManager)
+driver(pneumaticManager)
 driver(Block)
 wait(15,MSEC)
 
