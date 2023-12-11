@@ -6,12 +6,14 @@
 # 	Description:  V5 project                                                   #
 #                                                                              #
 # ---------------------------------------------------------------------------- #
+trackwidth = 12.25
+wheelbase = 10
+wheeldiam = 4
 # region ------------conf-------------
 # Library imports
 from vex import *
 
 auton = '' # selección de autonomo fisico :)
-trackwidth = 12.25
 
 # Brain should be defined by default
 brain=Brain()
@@ -33,6 +35,7 @@ autonSel = Optical(Ports.PORT9)
 untip = DigitalOut(brain.three_wire_port.d)
 gyro = Inertial(Ports.PORT11)
 Blocker = DigitalOut(brain.three_wire_port.e)
+robot = SmartDrive(Lside,Rside,gyro,math.pi*wheeldiam,trackwidth,wheelbase,INCHES,7/3)
 
 player=Controller()
 
@@ -98,82 +101,67 @@ def Block():
     if not catsens.pressing(): windup()
     while player.buttonY.pressing():
       wait(5,MSEC)
+def matchload():
+  while True:
+    while not player.buttonRight.pressing():
+      wait(5)
+    catapult.spin(FORWARD)
+    while player.buttonRight.pressing():
+      wait(5)
+    catapult.stop()
 # endregion
 # region --------auton funcs----------
 def process(val):
   if val > 0: return val
   elif val < 0: return 360 - val
   else: return 0
+def velocity(vel):
+  Lside.set_velocity(vel)
+  Rside.set_velocity(vel)
 def move(dis=float(24)):
   vel = 80
-  Lside.set_velocity(vel,PERCENT)
-  Rside.set_velocity(vel,PERCENT)
-  factor=5.5
-  tAmnt = dis/factor
-  Lside.spin_for(FORWARD,tAmnt,TURNS,wait=False)
-  Rside.spin_for(FORWARD,tAmnt,TURNS,wait=False)
-  slowdown([vel,tAmnt],[vel,tAmnt])
+  robot.set_drive_velocity(vel,PERCENT)
+  robot.drive_for(FORWARD,dis,wait=True)
   wait(5,MSEC)
 def smove(dis=float(24)):
-  Lside.set_velocity(10,PERCENT)
-  Rside.set_velocity(10,PERCENT)
-  factor=5.5
-  Lside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
-  Rside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
+  vel = 10
+  robot.set_drive_velocity(vel,PERCENT)
+  robot.drive_for(FORWARD,dis,wait=True)
   wait(5,MSEC)
 def nmove(dis=float(24)):
-  Lside.set_velocity(20,PERCENT)
-  Rside.set_velocity(20,PERCENT)
-  factor=5.5
-  Lside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
-  Rside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
+  vel = 20
+  robot.set_drive_velocity(vel,PERCENT)
+  robot.drive_for(FORWARD,dis,wait=True)
   wait(5,MSEC)
 def turn(theta=90):
-  gyro.set_heading(0)
-  Rside.set_velocity(37,PERCENT)
-  Lside.set_velocity(37,PERCENT)
-  turnAmount = calcRot(theta)
-  Lside.spin_for(FORWARD,turnAmount,TURNS,wait=False)
-  Rside.spin_for(REVERSE,turnAmount,TURNS,wait=True)
+  vel = 37
+  robot.set_turn_velocity(vel,PERCENT)
+  robot.turn_for(RIGHT,theta,wait=True)
   wait(5,MSEC)
-  finetune(theta)
 def pturn(theta=90):
-  gyro.set_heading(0)
-  Rside.set_velocity(45,PERCENT)
-  Lside.set_velocity(45,PERCENT)
+  velocity(45)
   turnAmount = abs(calcRot(theta)*2)
   if theta < 0: Lside.set_stopping(HOLD); Rside.spin_for(FORWARD,turnAmount,TURNS)
   else: Rside.set_stopping(HOLD); Lside.spin_for(FORWARD,turnAmount,TURNS)
   Lside.set_stopping(BRAKE)
   Rside.set_stopping(BRAKE)
   wait(5)
-  finetune(theta)
 def rpturn(theta=90):
-  gyro.set_heading(0)
-  Rside.set_velocity(45,PERCENT)
-  Lside.set_velocity(45,PERCENT)
+  velocity(45)
   turnAmount = -abs(calcRot(theta)*2)
   if theta < 0: Rside.set_stopping(HOLD); Lside.spin_for(FORWARD,turnAmount,TURNS)
   else: Lside.set_stopping(HOLD); Rside.spin_for(FORWARD,turnAmount,TURNS)
   Lside.set_stopping(BRAKE)
   Rside.set_stopping(BRAKE)
   wait(5)
-  finetune(theta)
 def sturn(theta=90):
-  gyro.set_heading(0)
-  Rside.set_velocity(20,PERCENT)
-  Lside.set_velocity(20,PERCENT)
-  turnAmount = calcRot(theta)
-  Lside.spin_for(FORWARD,turnAmount,TURNS,wait=False)
-  Rside.spin_for(REVERSE,turnAmount,TURNS,wait=True)
+  vel = 37
+  robot.set_turn_velocity(vel,PERCENT)
+  robot.turn_for(RIGHT,theta,wait=True)
   wait(5,MSEC)
-  if theta < 0: finetune(theta)
-  elif theta > 0: finetune(theta)
 def aturn(theta=90,pivdis=float(5)):
-  gyro.set_heading(0)
   vel = 55
-  Rside.set_velocity(vel,PERCENT)
-  Lside.set_velocity(vel,PERCENT)
+  velocity(vel)
   if theta < 0:
     turnR = abs(calcArc(theta,pivdis+trackwidth))
     turnL = abs(calcArc(theta,pivdis))
@@ -185,14 +173,11 @@ def aturn(theta=90,pivdis=float(5)):
     veL = vel
     veR = vel * (turnR/turnL)
   Rside.spin_for(FORWARD,turnR,TURNS,veR,PERCENT,False)
-  Lside.spin_for(FORWARD,turnL,TURNS,veL,PERCENT,False)
-  slowdown([veL,turnL],[veR,turnR])
+  Lside.spin_for(FORWARD,turnL,TURNS,veL,PERCENT,True)
   wait(5,MSEC)
 def raturn(theta=90,pivdis=float(5)):
-  gyro.set_heading(0)
   vel = 55
-  Rside.set_velocity(vel,PERCENT)
-  Lside.set_velocity(vel,PERCENT)
+  velocity(vel)
   if theta > 0:
     turnR = abs(calcArc(theta,pivdis+trackwidth))
     turnL = abs(calcArc(theta,pivdis))
@@ -204,31 +189,8 @@ def raturn(theta=90,pivdis=float(5)):
     veL = vel
     veR = vel * (turnR/turnL)
   Rside.spin_for(REVERSE,turnR,TURNS,veR,PERCENT,False)
-  Lside.spin_for(REVERSE,turnL,TURNS,veL,PERCENT,False)
-  slowdown([veL,turnL],[veR,turnR])
+  Lside.spin_for(REVERSE,turnL,TURNS,veL,PERCENT,True)
   wait(5,MSEC)
-def slowdown(lefty=[],right=[]):
-  maxRPM = ((lefty[0]/100)*600,(right[0]/100)*600)
-  durat = (lefty[1]/maxRPM[0]*60,right[1]/maxRPM[1]*60)
-  wait(durat[0]/2,SECONDS)
-  Lside.set_velocity(lefty[0]*0.6,PERCENT)
-  Rside.set_velocity(right[0]*0.6,PERCENT)
-  while Lside.is_spinning() and Rside.is_spinning():
-    wait(5,MSEC)
-def finetune(val):
-  val = process(val)
-  Rside.set_velocity(5,PERCENT)
-  Lside.set_velocity(5,PERCENT)
-  if (val + 1) < gyro.heading():
-    Lside.spin(REVERSE)
-    Rside.spin(FORWARD)
-  elif (val - 1) > gyro.heading():
-    Lside.spin(FORWARD)
-    Rside.spin(REVERSE)
-  while not (gyro.heading() < (val - 1) or gyro.heading() > (val + 1)):
-    wait(5,MSEC)
-  Lside.stop()
-  Rside.stop()
 def autonTime():
   setup(1)
   if auton == 'offen':
@@ -296,6 +258,7 @@ def autonTime():
 # endregion 
 # region --------comp funcs-----------
 def startDriver():
+  Thread(windup)
   driver.broadcast()
 def autoF():
   active = Thread(autonTime)
@@ -409,6 +372,7 @@ driver(endgameAlert)
 driver(joystickfunc)
 driver(intakefunc)
 driver(laCATAPULTA)
+driver(matchload) # Vincent istg si tu borras esto de nuevo
 driver(pneumaticManager)
 driver(Block)
 wait(15,MSEC)
