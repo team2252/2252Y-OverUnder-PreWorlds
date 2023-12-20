@@ -6,9 +6,13 @@
 # 	Description:  V5 project                                                   #
 #                                                                              #
 # ---------------------------------------------------------------------------- #
+trackwidth = 12.25
+wheelbase = 10
+wheeldiam = 4
 # region ------------conf-------------
 # Library imports
 from vex import *
+
 auton = '' # selección de autonomo fisico :)
 
 # Brain should be defined by default
@@ -18,34 +22,40 @@ frontleft = Motor(Ports.PORT1, GearSetting.RATIO_6_1, True)
 frontright = Motor(Ports.PORT2, GearSetting.RATIO_6_1, False)
 backleft = Motor(Ports.PORT3,GearSetting.RATIO_6_1,True)
 backright = Motor(Ports.PORT4,GearSetting.RATIO_6_1,False)
-rightside = MotorGroup(frontright,backright)
-leftside = MotorGroup(frontleft,backleft)
+Rside = MotorGroup(frontright,backright)
+Lside = MotorGroup(frontleft,backleft)
 intake = Motor(Ports.PORT5,GearSetting.RATIO_18_1,True)
-catapult = Motor(Ports.PORT6,GearSetting.RATIO_18_1,False)
+catapult1 = Motor(Ports.PORT6,GearSetting.RATIO_18_1,False)
+catapult2 = Motor(Ports.PORT7,GearSetting.RATIO_36_1,True)
+catapult = MotorGroup(catapult2,catapult2)
 wings1 = DigitalOut(brain.three_wire_port.a)
 wings2 = DigitalOut(brain.three_wire_port.b)
 catsens = Limit(brain.three_wire_port.c)
 autonSel = Optical(Ports.PORT9)
 brazo = Motor(Ports.PORT10,GearSetting.RATIO_18_1,False)
-wedge = DigitalOut(brain.three_wire_port.d)
+untip = DigitalOut(brain.three_wire_port.d)
 gyro = Inertial(Ports.PORT11)
+Blocker = DigitalOut(brain.three_wire_port.e)
+robot = SmartDrive(Lside,Rside,gyro,wheeldiam*math.pi,trackwidth,wheelbase,INCHES,7/3)
 
 player=Controller()
 
-gyro.calibrate()
-while gyro.is_calibrating():
+robot.g.calibrate()
+while robot.g.is_calibrating():
   wait(15,MSEC)
 # endregion
 # region --------driver funcs---------
 def endgameAlert():
   wait(80,SECONDS)
   player.rumble('..-')
+  wait(15,SECONDS)
+  player.rumble('---')
 def joystickfunc():
-  leftside.spin(FORWARD)
-  rightside.spin(FORWARD)
+  Lside.spin(FORWARD)
+  Rside.spin(FORWARD)
   while True:
-    leftside.set_velocity(player.axis3.position()+player.axis1.position(),PERCENT)
-    rightside.set_velocity(player.axis3.position()-player.axis1.position(),PERCENT)
+    Lside.set_velocity(player.axis3.position()+player.axis1.position(),PERCENT)
+    Rside.set_velocity(player.axis3.position()-player.axis1.position(),PERCENT)
     wait(5,MSEC)
 def intakefunc():
   intake.set_velocity(100,PERCENT)
@@ -57,23 +67,25 @@ def intakefunc():
     else:
       intake.stop()
 def laCATAPULTA():
+  global catActiv
   while True:
-    while not player.buttonR2.pressing():
-      wait(5,MSEC)
-    if catsens.pressing():
+    catActiv = True
+    while (not player.buttonR2.pressing()) and catActiv:
+      unwind()
+    if catsens.pressing() and player.buttonR2.pressing() and catActiv:
       release()
       wait(15,MSEC)
       windup()
-    else:
+    elif player.buttonR2.pressing() and catActiv:
       windup()
-    while player.buttonR2.pressing():
-      wait(5,MSEC)
+    while player.buttonR2.pressing() and catActiv:
+      unwind()
 def wingManager():
   wingActivator = Event()
   wingActivator(R1Manager)
   wingActivator(LWingManager)
   wingActivator(RWingManager)
-  wingActivator(wedgeF)
+  wingActivator(untipF)
   wait(15,MSEC)
   wingActivator.broadcast()
 def matchLoad():
@@ -84,20 +96,18 @@ def matchLoad():
     while player.buttonRight.pressing():
       wait(5,MSEC)
     catapult.stop()
-def hangfunc():
-  brazo.set_velocity(75,PERCENT)
-  brazo.spin(REVERSE)
-  wait(0.25,SECONDS)
-  brazo.stop()
-  windup()
-  while True:
-    if player.buttonLeft.pressing():
-      brazo.spin(FORWARD)
-    elif player.buttonUp.pressing():
-      brazo.spin(REVERSE)
-    else:
-      brazo.stop()
-
+def Block():
+ while True:
+    while not player.buttonY.pressing():
+      wait(5,MSEC) 
+    Blocker.set(True)
+    while player.buttonY.pressing():
+      wait(5,MSEC)
+    while not player.buttonY.pressing():
+      wait(5,MSEC) 
+    Blocker.set(False)
+    while player.buttonY.pressing():
+      wait(5,MSEC)
 # endregion
 # region --------auton funcs----------
 def process(val):
@@ -105,95 +115,122 @@ def process(val):
   elif val < 0: return 360 - val
   else: return 0
 def move(dis=float(24)):
-  leftside.set_velocity(75,PERCENT)
-  rightside.set_velocity(75,PERCENT)
-  factor=5.5
-  leftside.spin_for(FORWARD,dis/factor,TURNS,wait=False)
-  rightside.spin_for(FORWARD,dis/factor,TURNS,wait=True)
+  vel = 80
+  robot.set_drive_velocity(vel,PERCENT)
+  robot.drive_for(FORWARD,dis,wait=True)
   wait(5,MSEC)
+def smove(dis=float(24)):
+  vel = 20
+  robot.set_drive_velocity(vel,PERCENT)
+  robot.drive_for(FORWARD,dis,wait=True)
 def turn(theta=90):
-  gyro.set_heading(0)
-  rightside.set_velocity(30,PERCENT)
-  leftside.set_velocity(30,PERCENT)
-  factor=48
-  leftside.spin_for(FORWARD,theta/factor,TURNS,wait=False)
-  rightside.spin_for(REVERSE,theta/factor,TURNS,wait=True)
-  rightside.set_velocity(50,PERCENT)
-  leftside.set_velocity(50,PERCENT)
-  wait(5,MSEC)
-  if theta < 0: finetune(theta,'l')
-  elif theta > 0: finetune(theta,'r')
+  vel = 37
+  robot.set_turn_velocity(vel,PERCENT)
+  robot.turn_for(RIGHT,theta,wait=True)
+def pturn(theta=90):
+  # gyro.set_heading(0)
+  Rside.set_velocity(45,PERCENT)
+  Lside.set_velocity(45,PERCENT)
+  turnAmount = abs(calcPTurn(theta))
+  if theta < 0: Lside.set_stopping(HOLD); Rside.spin_for(FORWARD,turnAmount,TURNS)
+  else: Rside.set_stopping(HOLD); Lside.spin_for(FORWARD,turnAmount,TURNS)
+  Lside.set_stopping(BRAKE)
+  Rside.set_stopping(BRAKE)
+  wait(5)
+  # finetune(theta)
+def rpturn(theta=90):
+  # gyro.set_heading(0)
+  Rside.set_velocity(45,PERCENT)
+  Lside.set_velocity(45,PERCENT)
+  turnAmount = -abs(calcPTurn(theta))
+  if theta < 0: Rside.set_stopping(HOLD); Lside.spin_for(FORWARD,turnAmount,TURNS)
+  else: Lside.set_stopping(HOLD); Rside.spin_for(FORWARD,turnAmount,TURNS)
+  Lside.set_stopping(BRAKE)
+  Rside.set_stopping(BRAKE)
+  wait(5)
+  # finetune(theta)
 def sturn(theta=90):
+  vel = 20
+  robot.set_turn_velocity(vel,PERCENT)
+  robot.turn_for(RIGHT,theta,wait=True)
+def aturn(theta=90,pivdis=float(5)):
   gyro.set_heading(0)
-  rightside.set_velocity(20,PERCENT)
-  leftside.set_velocity(20,PERCENT)
-  factor=48
-  leftside.spin_for(FORWARD,theta/factor,TURNS,wait=False)
-  rightside.spin_for(REVERSE,theta/factor,TURNS,wait=True)
-  rightside.set_velocity(40,PERCENT)
-  leftside.set_velocity(40,PERCENT)
+  vel = 55
+  velocity(vel)
+  if theta < 0:
+    turnR = abs(calcArc(theta,pivdis+trackwidth))
+    turnL = abs(calcArc(theta,pivdis))
+    veL = vel * (turnL/turnR)
+    veR = vel
+  else:
+    turnL = abs(calcArc(theta,pivdis+trackwidth))
+    turnR = abs(calcArc(theta,pivdis))
+    veL = vel
+    veR = vel * (turnR/turnL)
+  Rside.spin_for(FORWARD,turnR,TURNS,veR,PERCENT,False)
+  Lside.spin_for(FORWARD,turnL,TURNS,veL,PERCENT,False)
   wait(5,MSEC)
-  if theta < 0: finetune(theta,'l')
-  elif theta > 0: finetune(theta,'r')
-def finetune(val,dir):
-  val = process(val)
-  rightside.set_velocity(5,PERCENT)
-  leftside.set_velocity(5,PERCENT)
-  if (val + 2.5) < gyro.heading():
-    leftside.spin(REVERSE)
-    rightside.spin(FORWARD)
-  elif (val - 2.5) > gyro.heading():
-    leftside.spin(FORWARD)
-    rightside.spin(REVERSE)
-  while not (gyro.heading() < (val - 2.5) or gyro.heading() > (val + 2.5)):
-    wait(5,MSEC)
-  leftside.stop()
-  rightside.stop()
+def raturn(theta=90,pivdis=float(5)):
+  # gyro.set_heading(0)
+  vel = 55
+  Rside.set_velocity(vel,PERCENT)
+  Lside.set_velocity(vel,PERCENT)
+  if theta > 0:
+    turnR = abs(calcArc(theta,pivdis+trackwidth))
+    turnL = abs(calcArc(theta,pivdis))
+    veL = vel * (turnL/turnR)
+    veR = vel
+  else:
+    turnL = abs(calcArc(theta,pivdis+trackwidth))
+    turnR = abs(calcArc(theta,pivdis))
+    veL = vel
+    veR = vel * (turnR/turnL)
+  Rside.spin_for(REVERSE,turnR,TURNS,veR,PERCENT,False)
+  Lside.spin_for(REVERSE,turnL,TURNS,veL,PERCENT,False)
+  wait(5,MSEC)
+def velocity(val=100):
+  Rside.set_velocity(val,PERCENT)
+  Lside.set_velocity(val,PERCENT)
 def autonTime():
   setup(1)
   if auton == 'offen':
-    rightside.set_velocity(75,PERCENT)
-    leftside.set_velocity(75,PERCENT)
-    move(3)
-    wait(500,MSEC)
+    gyro.set_heading(0)
+    Blocker.set(True)
+    move(7)
+    Blocker.set(False)
+    pturn(-25)
     catapult.spin(FORWARD)
-    wait(40000,MSEC)
+    wait(43,SECONDS)
     catapult.stop()
-    wait(200,MSEC)
-    move(-2)
-    turn(-90)
-    move(-29)
-    move(4)
-    turn(-80)
-    move(-7)
-    wait(10,MSEC)
-    move(20)
-    turn(-60)
-    move(40)
-    turn(50)
-    move(18)
-    wings(True)
-    move(50)
-    wings(False)
-    move(-20)
-    turn(-30)
-    wings(True)
-    move(20)
-    wings(False)
     move(-5)
-    turn(30)
-    move(-10)
+    turn(140)
+    move(63)
+    turn(85)
+    move(39)
     wings(True)
-    move(30)
-
-
-
-    
-
+    move(45)
+    wait(10,MSEC)
+    move(-25)
+    wings(False)
+    turn(90)
+    move(27)
+    turn(-150)
+    wings(True)
+    aturn(90,10)
+    move(-7)
+    move(15)
+    wings(False)
+    move(-25)
+    turn(90)
+    move(-27)
+    wings(True)
+    aturn(-90,15)
+    move(-15)
+    move(15)
+    move(-10)
+    wings(False)
   elif auton == 'defen':
-    move(1)
-    move()
-
+    Blocker.set(True)
   else:
     pass
 # endregion 
@@ -219,12 +256,22 @@ def wings(exp=True):
 def windup():
   catapult.spin(FORWARD)
   while (not catsens.pressing()):
-    wait(5,MSEC)
-  catapult.spin_for(FORWARD,1/5,TURNS,wait=True)
+    unwind()
+  catapult.spin_for(FORWARD,1/7,TURNS,wait=False)
+  while catapult.is_spinning():
+    unwind()
+def unwind():
+  catActiv = False
+  if player.buttonX.pressing():
+    catapult.spin(REVERSE)
+    while player.buttonX.pressing():
+      wait(5)
+    catapult.stop()
+  wait(5)
 def release():
   catapult.spin(FORWARD)
   while catsens.pressing():
-    wait(5,MSEC)
+    unwind()
   catapult.stop()
 def detectAuton():
   autonSel.set_light(LedStateType.ON)
@@ -246,13 +293,13 @@ def detectAuton():
 def setup(value=0):
   if value == 1:
     global auton
-    rightside.set_velocity(50,PERCENT)
-    leftside.set_velocity(50,PERCENT)
+    Rside.set_velocity(50,PERCENT)
+    Lside.set_velocity(50,PERCENT)
     auton = detectAuton()
   else: 
     intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
   wings(False)
-  catapult.set_stopping(COAST)
+  catapult.set_stopping(HOLD)
   catapult.set_velocity(100,PERCENT)
 def R1Manager():
   while True:
@@ -278,21 +325,29 @@ def RWingManager():
     while player.buttonB.pressing():
       wait(5,MSEC)
     wings2.set(False)
-def wedgeF():
-  wedge.set(False)
-  toggle = 0
+def untipF():
+  untip.set(False)
   while True:
-    while not (player.buttonY.pressing()):
+    while not (player.buttonUp.pressing()):
       wait(5,MSEC)
-    if toggle == 0:
-      wedge.set(True)
-      toggle = 1
-    elif toggle == 1:
-      wedge.set(False)
-      toggle = 0
-    while player.buttonY.pressing():
+    untip.set(True)
+    while player.buttonUp.pressing():
       wait(5,MSEC)
+    untip.set(False)
+def calcPTurn(val=float(0)):
+  rCirc = trackwidth * math.pi * 2
+  turnDist = ((val/360)*rCirc)
+  turnAmnt = turnDist/wheeldiam*math.pi
+  return turnAmnt*7/3
+def calcRot(val=float(0)):
+  rCirc = trackwidth * math.pi
+  return ((val/360)*rCirc/12.556)*7/3
+def calcArc(degs=0,dis=float(0)):
+  val = ((degs * math.pi) / 180) * dis
+  return val/12.556*7/3
 # endregion
+def autonTest():
+  aturn(-90,15)
 driver = Event()
 comp = Competition(drivF,autoF)
 driver(endgameAlert)
@@ -301,7 +356,7 @@ driver(intakefunc)
 driver(laCATAPULTA)
 driver(matchLoad)
 driver(wingManager)
-driver(hangfunc)
+driver(Block)
 wait(15,MSEC)
 
 setup()
