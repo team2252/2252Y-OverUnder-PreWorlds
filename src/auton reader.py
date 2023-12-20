@@ -92,13 +92,13 @@ def Block():
     while not player.buttonY.pressing():
       wait(5,MSEC) 
     Blocker.set(True)
-    if catsens.pressing(): Thread(release)
+    if catsens.pressing(): release()
     while player.buttonY.pressing():
       wait(5,MSEC)
     while not player.buttonY.pressing():
       wait(5,MSEC) 
     Blocker.set(False)
-    if not catsens.pressing(): Thread(windup)
+    if not catsens.pressing(): windup()
     while player.buttonY.pressing():
       wait(5,MSEC)
 def matchload():
@@ -260,17 +260,17 @@ def autonTime():
 def startDriver():
   Thread(windup)
   driver.broadcast()
-def autoF():
-  active = Thread(autonTime)
-  while (comp.is_autonomous() and comp.is_enabled()):
-    wait(10,MSEC)
-  active.stop()
-def drivF():
-  setup(1)
-  active = Thread(startDriver)
-  while comp.is_driver_control() and comp.is_enabled():
-    wait(5,MSEC)
-  active.stop()
+# def autoF():
+#   active = Thread(autonTime)
+#   while (comp.is_autonomous() and comp.is_enabled()):
+#     wait(10,MSEC)
+#   active.stop()
+# def drivF():
+#   setup(1)
+#   active = Thread(startDriver)
+#   while comp.is_driver_control() and comp.is_enabled():
+#     wait(5,MSEC)
+#   active.stop()
 # endregion
 # region --------other funcs----------
 def wings(exp=True):
@@ -367,7 +367,6 @@ def calcArc(degs=0,dis=float(0)):
 def autonTest():
   aturn(-90,15)
 driver = Event()
-comp = Competition(drivF,autoF)
 driver(endgameAlert)
 driver(joystickfunc)
 driver(intakefunc)
@@ -378,3 +377,31 @@ driver(Block)
 wait(15,MSEC)
 
 setup()
+
+csv_header = 'time, velL, velR'
+file_name = 'skillAuton.csv'
+polling_rate = 50
+databuffer = csv_header + '\n'
+
+def reader():
+  Lside.reset_position()
+  Rside.reset_position()
+  if not brain.sdcard.is_inserted():
+    brain.screen.set_cursor(1,1)
+    brain.screen.print("SD Card Missing")
+    while True:
+      wait(5)
+  while not player.buttonR2.pressing():
+    wait(5)
+  while player.buttonR2.pressing():
+    wait(5)
+  brain.timer.clear()
+  while not player.buttonR2.pressing():
+    databuffer = databuffer + "%1.2f" % brain.timer.value() + "," # type: ignore
+    databuffer = databuffer + "%1.2f" % Lside.velocity() + "," # type: ignore
+    databuffer = databuffer + "%1.2f" % Rside.velocity() + "\n" # type: ignore
+    wait(polling_rate,MSEC)
+  
+  brain.sdcard.savefile(file_name,bytearray(databuffer,'utf-8')) # type: ignore
+
+reader()

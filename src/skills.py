@@ -9,6 +9,9 @@
 trackwidth = 12.25
 wheelbase = 10
 wheeldiam = 4
+
+autonFile = open("skillAuton.csv", 'r')
+global autonDat
 # region ------------conf-------------
 # Library imports
 from vex import *
@@ -230,7 +233,15 @@ def autonTime():
     move(-10)
     wings(False)
   elif auton == 'defen':
-    Blocker.set(True)
+    Rside.set_velocity(0,PERCENT)
+    Lside.set_velocity(0,PERCENT)
+    Rside.spin(FORWARD)
+    Lside.spin(REVERSE)
+    brain.timer.clear()
+    for values in autonDat: # type: ignore
+      Lside.set_velocity(values[1])
+      Rside.set_velocity(values[2])
+      wait(50)
   else:
     pass
 # endregion 
@@ -296,6 +307,7 @@ def setup(value=0):
     Rside.set_velocity(50,PERCENT)
     Lside.set_velocity(50,PERCENT)
     auton = detectAuton()
+    autonDat = getData(autonFile)
   else: 
     intake.set_velocity(100,PERCENT)#inital values de motores y whatnot
   wings(False)
@@ -345,6 +357,14 @@ def calcRot(val=float(0)):
 def calcArc(degs=0,dis=float(0)):
   val = ((degs * math.pi) / 180) * dis
   return val/12.556*7/3
+def getData(var):
+  dat = []
+  dat2 = []
+  for line in var.readlines():
+    dat2.append(line.split(','))
+    dat.append(dat2)
+    dat2.clear()
+  return dat
 # endregion
 def autonTest():
   aturn(-90,15)
