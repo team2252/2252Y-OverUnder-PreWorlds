@@ -218,12 +218,10 @@ def releaseIntake():
 def autonTime():
   setup(1)
   if auton == 'offen':
-    Thread(releaseIntake)
-    wings2.set(True)
-    wait(200,MSEC)
-    wings2.set(False)
-    wait(100,MSEC)
-    move(29)
+    catapult.spin_for(FORWARD,0.55,TURNS,wait=False)
+    move(12)
+    intake.spin_for(REVERSE,6,TURNS,wait=False,velocity=60)
+    move(17)
     sturn(-37)
     intake.spin_for(FORWARD,14,TURNS,wait=False)
     move(50)
@@ -245,17 +243,10 @@ def autonTime():
     wait(100,MSEC)
     move(14)
     intake.spin_for(REVERSE,3,TURNS,wait=True)
-    move(12)
+    move(17)
+    move(-7)
     wait(100,MSEC)
     Blocker.set(False)
-    move(-32)
-    wait(100,MSEC)
-    move(2)
-    turn(50)
-    move(56)
-    turn(80)
-    move(-27)
-    move(10)
   elif auton == 'defen':
     Blocker.set(True)
     wings2.set(True)
@@ -354,10 +345,16 @@ def RWingManager():
 def untipF():
   untip.set(False)
   while True:
-    while not (player.buttonUp.pressing()):
+    while not (player.buttonUp.pressing() or player.buttonX.pressing()):
       wait(5,MSEC)
+    if player.buttonX.pressing():
+      Blocker.set(True)
+      wait(400)
     untip.set(True)
-    while player.buttonUp.pressing():
+    if player.buttonX.pressing():
+      wait(25)
+      Blocker.set(False)
+    while player.buttonUp.pressing() or player.buttonX.pressing():
       wait(5,MSEC)
     untip.set(False)
 def calcRot(val=float(0)):
