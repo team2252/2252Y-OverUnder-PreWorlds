@@ -276,17 +276,17 @@ def autonTime():
 # region --------comp funcs-----------
 def startDriver():
   driver.broadcast()
-def autoF():
-  active = Thread(autonTime)
-  while (comp.is_autonomous() and comp.is_enabled()):
-    wait(10,MSEC)
-  active.stop()
-def drivF():
-  setup(1)
-  active = Thread(startDriver)
-  while comp.is_driver_control() and comp.is_enabled():
-    wait(5,MSEC)
-  active.stop()
+# def autoF():
+#   active = Thread(autonTime)
+#   while (comp.is_autonomous() and comp.is_enabled()):
+#     wait(10,MSEC)
+#   active.stop()
+# def drivF():
+#   setup(1)
+#   active = Thread(startDriver)
+#   while comp.is_driver_control() and comp.is_enabled():
+#     wait(5,MSEC)
+#   active.stop()
 # endregion
 # region --------other funcs----------
 def wings(exp=True):
@@ -369,7 +369,6 @@ def calcArc(degs=0,dis=float(0)):
 def autonTest():
   aturn(-90,15)
 driver = Event()
-comp = Competition(drivF,autoF)
 driver(endgameAlert)
 driver(joystickfunc)
 driver(intakefunc)
@@ -379,3 +378,18 @@ driver(Block)
 wait(15,MSEC)
 
 setup()
+polling_rate = 50
+data = "number,axis3,axis1\n"
+
+brain.timer.reset()
+while not player.buttonA.pressing():
+  wait(5)
+wait(3,SECONDS)
+active = Thread(driver)
+while True:
+  if player.buttonA.pressing():
+    break
+  data += "%5.2f" % brain.timer.value() + ','
+  data += "%5.2f" % player.axis3.position() + ','
+  data += "%5.2f" % player.axis1.position() + '\n'
+  wait(polling_rate)
