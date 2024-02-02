@@ -215,39 +215,54 @@ def releaseIntake():
   Blocker.set(True)
   wait(100)
   Blocker.set(False)
-def autonTime():
+def tmove(time):
+  velocity(80)
+  Lside.spin(FORWARD)
+  Rside.spin(FORWARD)
+  wait(time,SECONDS)
+  Lside.stop()
+  Rside.stop()
+def rtmove(time):
+  velocity(80)
+  Lside.spin(REVERSE)
+  Rside.spin(REVERSE)
+  wait(time,SECONDS)
+  Lside.stop()
+  Rside.stop()
+def startSkills():
   setup(1)
   rpturn(-45)
   move(-33)
   pturn(30)
   move(5)
   turn(90)
-  move(1)
+  move(2)
+def autonTime():
+  startSkills()
   catapult.spin(FORWARD)
-  wait(1,SECONDS)
+  wait(0.5,SECONDS)
   catapult.stop()
   catapult.set_stopping(HOLD)
   catapult.spin_for(FORWARD,0.49,TURNS,wait=False)
   move(-10)
   rpturn(120)
-  move(-27)
-  move(7)
-  turn(-98)
-  move(-96)
+  rtmove(0.7)
+  move(20)
+  turn(40)
+  move(25)
+  turn(40)
+  move(70)
+  rtmove(0.5)
   catapult.spin_for(FORWARD,0.5,TURNS,wait=False)
   catapult.set_stopping(COAST)
-  rpturn(-45)
-  move(-23)
-  rpturn(-50)
-  move(2)
-  move(-10)
-  move(10)
-  move(-15)
-  move(7)
+  
+
+  
   
 # endregion 
 # region --------comp funcs-----------
 def startDriver():
+  startSkills()
   driver.broadcast()
 def autoF():
   active = Thread(autonTime)
