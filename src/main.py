@@ -34,12 +34,39 @@ autonSel = Optical(Ports.PORT9)
 untip = DigitalOut(brain.three_wire_port.d)
 gyro = Inertial(Ports.PORT11)
 Blocker = DigitalOut(brain.three_wire_port.e)
+catsens = Rotation(Ports.PORT7, False)
 
 player=Controller()
 
 gyro.calibrate()
 while gyro.is_calibrating():
   wait(15,MSEC)
+def rotcata():
+  global minrot, maxrot
+  minrot = catsens.angle()
+  maxrot = catsens.angle()
+  catapult.spin_for(FORWARD,1,TURNS,wait=False)
+  while catapult.is_spinning():
+    if catsens.angle() < minrot: minrot = catsens.angle()
+    if catsens.angle > maxrot: maxrot = catsens.angle()
+    wait(5)
+  catapult.stop()
+  player.screen.print("cali ready")
+  while True:
+    while not player.buttonRight.pressing():
+      wait(5)
+    catapult.spin(FORWARD)
+    catapult.set_stopping(HOLD)
+    while catsens.angle() < maxrot:
+      wait(5)
+    catapult.stop()
+    while player.buttonRight.pressing():
+      wait(5)
+    while not player.buttonRight.pressing():
+      wait(5)
+    catapult.set_stopping(COAST)
+    while player.buttonRight.pressing():
+      wait(5)
 # endregion
 # region --------driver funcs---------
 def endgameAlert():
@@ -256,13 +283,16 @@ def autonTime():
     turn(-120)
     intake.spin_for(FORWARD,7,TURNS,wait=False)
     move(27)
-    turn(160)
-    wings1.set(True)
-    intake.spin_for(REVERSE,8,TURNS,wait=False)
-    move(37)
-    move(-5)
+    turn(150)
+    rtmove(0.5)
+    wings(True)
+    intake.spin_for(REVERSE,2,TURNS,wait=False)
+    move(46)
+    wait(100,MSEC)
+    move(-10)
+    wings(False)
 
-    # turn(150)
+      # turn(150)
     # wings1.set(True)
     # move(20)
     # intake.spin_for(REVERSE,3,TURNS,wait=False)
@@ -432,6 +462,7 @@ driver(intakefunc)
 driver(laCATAPULTA)
 driver(pneumaticManager)
 driver(Block)
+driver(rotcata)
 wait(15,MSEC)
 
 setup()
