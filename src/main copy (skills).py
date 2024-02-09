@@ -261,6 +261,9 @@ def autonTime():
   move(6)
   turn(-90)
   rtmove(1.3)
+  turn(-50)
+  wings(True)
+  aturn(30,10)
   
 # endregion 
 # region --------comp funcs-----------
