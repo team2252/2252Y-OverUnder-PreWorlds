@@ -46,9 +46,11 @@ def rotcata():
   minrot = catsens.angle()
   maxrot = catsens.angle()
   catapult.spin_for(FORWARD,1,TURNS,wait=False)
-  while catapult.is_spinning():
+  while True:
     if catsens.angle() < minrot: minrot = catsens.angle()
     if catsens.angle > maxrot: maxrot = catsens.angle()
+    if catapult.():
+      break
     wait(5)
   catapult.stop()
   player.screen.print("cali ready")

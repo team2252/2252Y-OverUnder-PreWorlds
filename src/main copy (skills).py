@@ -246,18 +246,21 @@ def autonTime():
   catapult.spin_for(FORWARD,0.49,TURNS,wait=False)
   move(-10)
   rpturn(120)
-  rtmove(0.7)
-  move(20)
-  turn(40)
-  move(25)
-  turn(40)
-  move(70)
-  rtmove(0.5)
-  catapult.spin_for(FORWARD,0.5,TURNS,wait=False)
+  move(-10)
+  turn(-97)
+  move(-95)
   catapult.set_stopping(COAST)
-  
-
-  
+  raturn(-100,16)
+  move(3)
+  rtmove(0.7)
+  catapult.spin(FORWARD)
+  wait(0.3,SECONDS)
+  catapult.stop()
+  move(5)
+  rtmove(0.4)
+  move(6)
+  turn(-90)
+  rtmove(1.3)
   
 # endregion 
 # region --------comp funcs-----------
